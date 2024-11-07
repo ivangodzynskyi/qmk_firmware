@@ -23,22 +23,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 enum combos {
-  BSPCU_LEFT,
-  BSPCI_UP,
-  BSPCO_DOWN,
-  BSPCP_RIGHT
+  LEFT_COMBO,
+  UP_COMBO,
+  DOWN_COMBO,
+  RIGHT_COMBO
 };
 
-const uint16_t PROGMEM bspcu_combo[] = {KC_BSPC, KC_U, COMBO_END};
-const uint16_t PROGMEM bspci_combo[] = {KC_BSPC, KC_I, COMBO_END};
-const uint16_t PROGMEM bspco_combo[] = {KC_BSPC, KC_O, COMBO_END};
-const uint16_t PROGMEM bspcp_combo[] = {KC_BSPC, KC_P, COMBO_END};
+const uint16_t PROGMEM left_combo[] = {KC_M, KC_BSPC, COMBO_END};
+const uint16_t PROGMEM up_combo[] = {KC_COMM, KC_BSPC, COMBO_END};
+const uint16_t PROGMEM down_combo[] = {KC_DOT, KC_BSPC, COMBO_END};
+const uint16_t PROGMEM right_combo[] = {KC_SLSH, KC_BSPC, COMBO_END};
 
 combo_t key_combos[] = {
-  [BSPCU_LEFT] = COMBO(bspcu_combo, KC_LEFT),
-  [BSPCI_UP] = COMBO(bspci_combo, KC_UP),
-  [BSPCO_DOWN] = COMBO(bspco_combo, KC_DOWN),
-  [BSPCP_RIGHT] = COMBO(bspcp_combo, KC_RIGHT),
+  [LEFT_COMBO] = COMBO(left_combo, KC_LEFT),
+  [UP_COMBO] = COMBO(up_combo, KC_UP),
+  [DOWN_COMBO] = COMBO(down_combo, KC_DOWN),
+  [RIGHT_COMBO] = COMBO(right_combo, KC_RIGHT),
 };
 
 // clang-format off
@@ -50,16 +50,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
            KC_TAB, LSFT_T(KC_A), LCTL_T(KC_S), LALT_T(KC_D), LGUI_T(KC_F),         KC_G,               KC_H,  LGUI_T(KC_J), LALT_T(KC_K), LCTL_T(KC_L), LSFT_T(KC_SCLN), KC_QUOT,
       //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
-            MO(3),         KC_Z,         KC_X,         KC_C,         KC_V,         KC_B,               KC_N,          KC_M,      KC_COMM,       KC_DOT,         KC_SLSH, KC_BTN2,
+            MO(3),         KC_Z,         KC_X,   LT(1,KC_C),   LT(2,KC_V),         KC_B,               KC_N,    LT(2,KC_M),LT(1,KC_COMM),       KC_DOT,         KC_SLSH, KC_BTN2,
       //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
-                                   KC_LALT,KC_LGUI, KC_BTN1, LT(1,KC_SPC),LT(2, KC_ENT),           KC_ESC,         KC_BSPC,      XXXXXXX,      XXXXXXX,   KC_BTN3
+                        KC_LALT,LT(2, KC_ENT),      KC_BTN1, LT(1,KC_SPC),LT(2, KC_ENT),           KC_ESC,         KC_BSPC,      XXXXXXX,      XXXXXXX,   KC_BTN3
   ),
 
   [1] = LAYOUT_universal(
     //,-----------------------------------------------------.                    ,-----------------------------------------------------.
           _______,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0, KC_RBRC,
       //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-          _______, _______, _______, _______, _______, _______,                       KC_EQL, KC_LEFT,   KC_UP, KC_DOWN,KC_RIGHT, _______,
+          _______, _______, _______, _______, _______, _______,                       KC_EQL, KC_LEFT,   KC_UP, KC_DOWN,KC_RIGHT, KC_BSLS,
       //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
           XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_MINS, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
       //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
@@ -86,7 +86,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 #define SCROLL_STEP_H 10
-#define SCROLL_STEP_V 10
+#define SCROLL_STEP_V 15
 #define SCROLL_VALUE 1
 float scroll_accumulated_h = 0;
 float scroll_accumulated_v = 0;

@@ -21,22 +21,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 enum combos {
-  UI_LEFT,
-  IO_UP,
-  COMMDOT_DOWN,
-  OP_RIGHT
+  LEFT_COMBO,
+  UP_COMBO,
+  DOWN_COMBO,
+  RIGHT_COMBO
 };
 
-const uint16_t PROGMEM io_combo[] = {KC_I, KC_O, COMBO_END};
-const uint16_t PROGMEM ui_combo[] = {KC_U, KC_I, COMBO_END};
-const uint16_t PROGMEM commdot_combo[] = {KC_COMM, KC_DOT, COMBO_END};
-const uint16_t PROGMEM op_combo[] = {KC_O, KC_P, COMBO_END};
+const uint16_t PROGMEM left_combo[] = {KC_M, KC_BSPC, COMBO_END};
+const uint16_t PROGMEM up_combo[] = {KC_COMM, KC_BSPC, COMBO_END};
+const uint16_t PROGMEM down_combo[] = {KC_DOT, KC_BSPC, COMBO_END};
+const uint16_t PROGMEM right_combo[] = {KC_SLSH, KC_BSPC, COMBO_END};
 
 combo_t key_combos[] = {
-  [UI_LEFT] = COMBO(ui_combo, KC_LEFT),
-  [IO_UP] = COMBO(io_combo, KC_UP),
-  [COMMDOT_DOWN] = COMBO(commdot_combo, KC_DOWN),
-  [OP_RIGHT] = COMBO(op_combo, KC_RIGHT),
+  [LEFT_COMBO] = COMBO(left_combo, KC_LEFT),
+  [UP_COMBO] = COMBO(up_combo, KC_UP),
+  [DOWN_COMBO] = COMBO(down_combo, KC_DOWN),
+  [RIGHT_COMBO] = COMBO(right_combo, KC_RIGHT),
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -58,9 +58,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
       _______,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0, KC_RBRC,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      _______, _______, _______, _______, _______, _______,                      _______, KC_LEFT,   KC_UP, KC_DOWN,KC_RIGHT, _______,
+      _______, _______, _______, _______, _______, _______,                      KC_EQL, KC_LEFT,   KC_UP, KC_DOWN, KC_RIGHT, KC_BSLS,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
+      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_MINS, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                           _______, _______, _______,    XXXXXXX, _______, _______
                                       //`--------------------------'  `--------------------------'
@@ -91,91 +91,88 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   )
 };
 
-// Modify these alues to adjust the scrolling speed
-#define SCROLL_DIVISOR_H 5.0
-#define SCROLL_DIVISOR_V 5.0
 
-// Variables to store accumulated scroll values
+#define SCROLL_STEP_H 10
+#define SCROLL_STEP_V 10
+#define SCROLL_VALUE 1
 float scroll_accumulated_h = 0;
 float scroll_accumulated_v = 0;
 
-// Modify these to adjust non-linear mouse scaling
-#define MAX_SCALE 32
-#define MIN_SCALE 1
-#define GROWTH_FACTOR 64
-#define MOMENTUM 0.01
-
-// Variable to store an exponential moving average scaling factor to denoise the non-linear scaling
-float accumulated_factor = MIN_SCALE;
 
 // Arrow keys slight slowing
-#define ARROW_STEP_X 15
-#define ARROW_STEP_Y 10
+#define ARROW_STEP_X 20
+#define ARROW_STEP_Y 20
 int accumulated_arrow_x = 0;
 int accumulated_arrow_y = 0;
 
-float average_arrow_x = 0;
-float average_arrow_y = 0;
+// Arrow keys slight slowing
+#define VOLUME_STEP_Y 40
+#define BRIGHT_STEP_X 40
+int accumulated_volume_y = 0;
+int accumulated_bright_x = 0;
 
-#define ARROW_MOMENTUM 0.8
-#define Y_TO_X_RATE 5
-
-// Alt-Tab parameteres
-#define ALT_TAB_STEP 8
-int accumulated_alt_tab = 0;
-int pressed_command = 0;
 
 // add non-linear scaling to all mouse movements
 report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
-    
+
     // arrow key emulation
     if (layer_state_is(1)) {
-        // move one space per click here, biasing towards vertical
-        // if you are moving in text horizontally and click an accidental
-        // vertical, you can just click back.  If you are moving vertically
-        // and send an accidental horizontal, you can't just click back
-        // if you are in a line shorter than where you started.  Thus,
-        // you should strongly prefer vertical movement to bias against
-        // accidental sideways clicks.  Almost all text scrolling is
-        // orthogonal, so this helps suppress diagonal motion.  Think of it
-        // as if you are in a box, and you move when you hit an edge, 
-        // resetting to the center each time.  
+        accumulated_arrow_x += mouse_report.x;
+        accumulated_arrow_y += mouse_report.y;
 
-        // This version additionally keeps a running average and only allows
-        // motion in the direction of the recent average 
-
-        // update the accumulated arrow momentum
-        average_arrow_x = average_arrow_x*ARROW_MOMENTUM + (float) mouse_report.x*(1-ARROW_MOMENTUM);
-        average_arrow_y = average_arrow_y*ARROW_MOMENTUM + (float) mouse_report.y*(1-ARROW_MOMENTUM);
-
-        // kill accumulated clicks orthogonal to average direction           
-        if (Y_TO_X_RATE * fabs(average_arrow_x) > fabs(average_arrow_y)){
-            accumulated_arrow_x += mouse_report.x;
+        if (accumulated_arrow_x < -ARROW_STEP_X) {
+            tap_code(KC_LEFT);
+            accumulated_arrow_x = 0;
             accumulated_arrow_y = 0;
         }
-        if (fabs(average_arrow_y) > Y_TO_X_RATE * fabs(average_arrow_x)){
-            accumulated_arrow_x = 0;
-            accumulated_arrow_y += mouse_report.y;
-        }
-    
-        // process queued clicks
-        if (accumulated_arrow_x <= -ARROW_STEP_X){
-            tap_code(KC_LEFT);
-            accumulated_arrow_x += ARROW_STEP_X;
-        }
-        if (accumulated_arrow_x >= ARROW_STEP_X) {
+        if (accumulated_arrow_x > ARROW_STEP_X) {
             tap_code(KC_RIGHT);
-            accumulated_arrow_x -= ARROW_STEP_X;
+            accumulated_arrow_x = 0;
+            accumulated_arrow_y = 0;
         }
-        if (accumulated_arrow_y <= -ARROW_STEP_Y){
-            tap_code(KC_UP);
-            accumulated_arrow_y += ARROW_STEP_Y;
-        }
-        if (accumulated_arrow_y >= ARROW_STEP_Y) {
+        if (accumulated_arrow_y > ARROW_STEP_Y) {
             tap_code(KC_DOWN);
-            accumulated_arrow_y -= ARROW_STEP_Y;
+            accumulated_arrow_x = 0;
+            accumulated_arrow_y = 0;
         }
-        
+        if (accumulated_arrow_y < -ARROW_STEP_Y) {
+            tap_code(KC_UP);
+            accumulated_arrow_x = 0;
+            accumulated_arrow_y = 0;
+        }
+
+        // return a null report
+        mouse_report.x = 0;
+        mouse_report.y = 0;
+        return mouse_report;
+    }
+
+    // volume and brightness
+    if (layer_state_is(3)) {
+        accumulated_bright_x += mouse_report.x;
+        accumulated_volume_y += mouse_report.y;
+
+        if (accumulated_bright_x < -BRIGHT_STEP_X) {
+            tap_code(KC_BRID);
+            accumulated_bright_x = 0;
+            accumulated_volume_y = 0;
+        }
+        if (accumulated_bright_x > BRIGHT_STEP_X) {
+            tap_code(KC_BRIU);
+            accumulated_bright_x = 0;
+            accumulated_volume_y = 0;
+        }
+        if (accumulated_volume_y > VOLUME_STEP_Y) {
+            tap_code(KC_VOLD);
+            accumulated_bright_x = 0;
+            accumulated_volume_y = 0;
+        }
+        if (accumulated_volume_y < -VOLUME_STEP_Y) {
+            tap_code(KC_VOLU);
+            accumulated_bright_x = 0;
+            accumulated_volume_y = 0;
+        }
+
         // return a null report
         mouse_report.x = 0;
         mouse_report.y = 0;
@@ -184,16 +181,29 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
 
     if (layer_state_is(2)) {
         // Calculate and accumulate scroll values based on mouse movement and divisors
-        // scroll_accumulated_h += (float)mouse_report.x / SCROLL_DIVISOR_H;
-        // scroll_accumulated_v += (float)mouse_report.y / SCROLL_DIVISOR_V;
+         scroll_accumulated_h += (float)mouse_report.x;
+         scroll_accumulated_v += (float)mouse_report.y;
 
-        // Assign integer parts of accumulated scroll values to the mouse report
-        mouse_report.h = -(float)mouse_report.x / SCROLL_DIVISOR_H;
-        mouse_report.v = (float)mouse_report.y / SCROLL_DIVISOR_V;
 
-        // Update accumulated scroll values by subtracting the integer parts
-        // scroll_accumulated_h -= (int16_t)scroll_accumulated_h;
-        // scroll_accumulated_v -= (int16_t)scroll_accumulated_v;
+        if (fabs(scroll_accumulated_v) >= SCROLL_STEP_V) {
+            if (scroll_accumulated_v > 0) {
+             mouse_report.v = (float)SCROLL_VALUE;
+            } else {
+             mouse_report.v = -(float)SCROLL_VALUE;
+            }
+            scroll_accumulated_v = 0;
+            scroll_accumulated_h = 0;
+        }
+        if (fabs(scroll_accumulated_h) >= SCROLL_STEP_H) {
+            if (scroll_accumulated_h > 0) {
+                mouse_report.h = -(float)SCROLL_VALUE;
+            } else {
+                mouse_report.h = (float)SCROLL_VALUE;
+            }
+            scroll_accumulated_h = 0;
+            scroll_accumulated_v = 0;
+
+        }
 
         // Clear the X and Y values of the mouse report
         mouse_report.x = 0;
