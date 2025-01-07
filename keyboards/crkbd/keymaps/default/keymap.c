@@ -19,48 +19,85 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "math.h"
 #include QMK_KEYBOARD_H
 
+enum custom_keycodes {
+    BSP_ESC = SAFE_RANGE, // Custom keycode for Backspace/Escape
+    K11 = KC_E,
+    K12 = KC_T,
+    K13 = KC_R,
+    K14 = KC_I,
+    K21 = KC_A,
+    K22 = KC_O,
+    K23 = KC_N,
+    K24 = KC_S
+};
 
 enum combos {
-  LEFT_COMBO,
-  UP_COMBO,
-  DOWN_COMBO,
-  RIGHT_COMBO
+  C1113,
+  C1112,
+  C1114,
+  C1221,
+  C1321,
+  C1421,
 };
 
-const uint16_t PROGMEM left_combo[] = {KC_M, KC_BSPC, COMBO_END};
-const uint16_t PROGMEM up_combo[] = {KC_COMM, KC_BSPC, COMBO_END};
-const uint16_t PROGMEM down_combo[] = {KC_DOT, KC_BSPC, COMBO_END};
-const uint16_t PROGMEM right_combo[] = {KC_SLSH, KC_BSPC, COMBO_END};
+const uint16_t PROGMEM c1112[] = {K11, K12, COMBO_END};
+const uint16_t PROGMEM c1113[] = {K11, K13, COMBO_END};
+const uint16_t PROGMEM c1114[] = {K11, K14, COMBO_END};
+const uint16_t PROGMEM c1221[] = {K12, K21, COMBO_END};
+const uint16_t PROGMEM c1321[] = {K13, K21, COMBO_END};
+const uint16_t PROGMEM c1421[] = {K14, K21, COMBO_END};
 
 combo_t key_combos[] = {
-  [LEFT_COMBO] = COMBO(left_combo, KC_LEFT),
-  [UP_COMBO] = COMBO(up_combo, KC_UP),
-  [DOWN_COMBO] = COMBO(down_combo, KC_DOWN),
-  [RIGHT_COMBO] = COMBO(right_combo, KC_RIGHT),
+  [C1112] = COMBO(c1112, KC_L),
+  [C1113] = COMBO(c1113, KC_DOT),
+  [C1114] = COMBO(c1114, KC_Z),
+  [C1221] = COMBO(c1221, KC_C),
+  [C1321] = COMBO(c1321, KC_V),
+  [C1421] = COMBO(c1421, KC_D),
 };
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    static uint16_t tap_timer; // Timer to track tap vs hold
+
+    switch (keycode) {
+        case BSP_ESC:
+            if (record->event.pressed) {
+                tap_timer = timer_read(); // Start the timer when pressed
+            } else {
+                if (timer_elapsed(tap_timer) < TAPPING_TERM) {
+                    tap_code(KC_BSPC);  // Send Backspace on tap
+                } else {
+                    tap_code(KC_ESC);   // Send Escape on hold
+                }
+            }
+            return false;  // Skip further processing for this key
+        default:
+            return true;   // Process other keycodes normally
+    }
+}
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT_split_3x6_3(
 
   //,------------------------------------------------------------------------------.          ,----------------------------------------------------------------------------.
-       KC_GRV,         KC_Q,         KC_W,         KC_E,         KC_R,         KC_T,               KC_Y,          KC_U,         KC_I,         KC_O,            KC_P, KC_LBRC,
+       KC_GRV,         KC_Q,         KC_W,         KC_E,         KC_R,         KC_T,               KC_BTN1,  OSM(MOD_LGUI), OSM(MOD_LALT),  OSM(MOD_LCTL), OSM(MOD_LSFT), BSP_ESC,
   //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
-       KC_TAB, LSFT_T(KC_A), LCTL_T(KC_S), LALT_T(KC_D), LGUI_T(KC_F),         KC_G,               KC_H, LGUI_T(KC_J), LALT_T(KC_K), LCTL_T(KC_L), LSFT_T(KC_SCLN), KC_QUOT,
+       KC_TAB, LSFT_T(KC_A), LCTL_T(KC_S), LALT_T(KC_D), LGUI_T(KC_F),         KC_G,               LT(2,KC_BTN3),  K11,           K12,         K13,        K14,  KC_TAB,
   //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
-        MO(3),         KC_Z,         KC_X,         KC_C,         KC_V,         KC_B,               KC_N,          KC_M,      KC_COMM,       KC_DOT,         KC_SLSH, KC_BTN2,
+        MO(3),         KC_Z,         KC_X,         KC_C,         KC_V,         KC_B,               KC_N,           K21,     LT(1,K22),         K23,         K24, KC_BTN2,
   //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
-                                                KC_BTN1, LT(1,KC_SPC),LT(2, KC_ENT),           XXXXXXX,       KC_BSPC,       KC_ESC
+                                                KC_BTN1, LT(1,KC_SPC),LT(2, KC_ENT),           XXXXXXX,  LT(3, KC_SPC), LT(4,KC_ENT)
                                             //`------------------------------------'         `-------------------------------------'
 
   ),
 
     [1] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-      _______,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0, KC_RBRC,
+      _______,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         XXXXXXX,    XXXXXXX,    XXXXXXX,    XXXXXXX,    XXXXXXX, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      _______, _______, _______, _______, _______, _______,                      KC_EQL, KC_LEFT,   KC_UP, KC_DOWN, KC_RIGHT, KC_BSLS,
+      _______, _______, _______, _______, _______, _______,                      KC_EQL, KC_LEFT,  XXXXXXX,    KC_UP, KC_RIGHT, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_MINS, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
+      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_MINS, XXXXXXX, XXXXXXX, KC_DOWN, XXXXXXX, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                           _______, _______, _______,    XXXXXXX, _______, _______
                                       //`--------------------------'  `--------------------------'
@@ -68,26 +105,26 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [2] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-       KC_F11,   KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                        KC_F6,   KC_F7,   KC_F8,   KC_F9,  KC_F10,  KC_F12,
+       KC_F11,   KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                        KC_EQL,   KC_7,   KC_8,   KC_9,  KC_F10,  KC_F12,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      _______, _______, _______, _______, _______, _______,                      KC_MINS,  KC_EQL, KC_LBRC, KC_RBRC, KC_BSLS,  KC_GRV,
+      _______, _______, _______, _______, _______, _______,                      KC_DOT,  KC_4, KC_5, KC_6, KC_BSLS,  KC_GRV,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      _______, _______, _______, _______, _______, _______,                      KC_UNDS, KC_PLUS, KC_LCBR, KC_RCBR, KC_PIPE, KC_TILD,
+      _______, _______, _______, _______, _______, _______,                      KC_0, KC_1, KC_2, KC_3, KC_PIPE, KC_TILD,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                           _______,  KC_SPC, _______,    XXXXXXX, _______, _______
                                       //`--------------------------'  `--------------------------'
   ),
 
     [3] = LAYOUT_split_3x6_3(
-  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-      QK_BOOT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      RGB_TOG, RGB_HUI, RGB_SAI, RGB_VAI, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      XXXXXXX, RGB_HUD, RGB_SAD, RGB_VAD, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                          _______, _______, _______,    XXXXXXX, _______, _______
-                                      //`--------------------------'  `--------------------------'
+    //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+         KC_F11,   KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                        KC_F12,   KC_F7,   KC_F8,   KC_F9,  KC_F10,  KC_F12,
+    //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+        _______, _______, _______, _______, _______, _______,                      KC_F11,  KC_F4, KC_F5, KC_F6, KC_BSLS,  KC_GRV,
+    //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+        _______, _______, _______, _______, _______, _______,                      KC_F10, KC_F1, KC_F2, KC_F3, KC_PIPE, KC_TILD,
+    //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+                                            _______,  KC_SPC, _______,    XXXXXXX, _______, _______
+                                        //`--------------------------'  `--------------------------'
   )
 };
 
