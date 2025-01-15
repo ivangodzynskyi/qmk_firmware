@@ -37,7 +37,30 @@ enum combos {
   C1114,
   C1221,
   C1321,
+  C1322,
   C1421,
+  C1123,
+  C1223,
+  C1422,
+  C1423,
+  C1124,
+  C1224,
+  C1324,
+  C1122,
+  C111213,
+  C111214,
+  C111314,
+  C112213,
+  C112223,
+  C112324,
+  C212324,
+  C211213,
+  C211214,
+  C211314,
+  C212223,
+  C222324,
+  C231112,
+  C231114,
 };
 
 const uint16_t PROGMEM c1112[] = {K11, K12, COMBO_END};
@@ -45,7 +68,31 @@ const uint16_t PROGMEM c1113[] = {K11, K13, COMBO_END};
 const uint16_t PROGMEM c1114[] = {K11, K14, COMBO_END};
 const uint16_t PROGMEM c1221[] = {K12, K21, COMBO_END};
 const uint16_t PROGMEM c1321[] = {K13, K21, COMBO_END};
+const uint16_t PROGMEM c1322[] = {K13, K22, COMBO_END};
 const uint16_t PROGMEM c1421[] = {K14, K21, COMBO_END};
+const uint16_t PROGMEM c1123[] = {K11, K23, COMBO_END};
+const uint16_t PROGMEM c1223[] = {K12, K23, COMBO_END};
+const uint16_t PROGMEM c1422[] = {K14, K22, COMBO_END};
+const uint16_t PROGMEM c1423[] = {K14, K23, COMBO_END};
+const uint16_t PROGMEM c1124[] = {K11, K24, COMBO_END};
+const uint16_t PROGMEM c1224[] = {K12, K24, COMBO_END};
+const uint16_t PROGMEM c1324[] = {K13, K24, COMBO_END};
+const uint16_t PROGMEM c1122[] = {K11, K22, COMBO_END};
+const uint16_t PROGMEM c111213[] = {K11, K12, K13, COMBO_END};
+const uint16_t PROGMEM c111214[] = {K11, K12, K14, COMBO_END};
+const uint16_t PROGMEM c111314[] = {K11, K13, K14, COMBO_END};
+const uint16_t PROGMEM c112213[] = {K11, K22, K13, COMBO_END};
+const uint16_t PROGMEM c112223[] = {K11, K22, K23, COMBO_END};
+const uint16_t PROGMEM c112324[] = {K11, K23, K24, COMBO_END};
+const uint16_t PROGMEM c212324[] = {K21, K23, K24, COMBO_END};
+const uint16_t PROGMEM c211213[] = {K21, K12, K13, COMBO_END};
+const uint16_t PROGMEM c211214[] = {K21, K12, K14, COMBO_END};
+const uint16_t PROGMEM c211314[] = {K21, K13, K14, COMBO_END};
+const uint16_t PROGMEM c212223[] = {K21, K22, K23, COMBO_END};
+const uint16_t PROGMEM c222324[] = {K22, K23, K24, COMBO_END};
+const uint16_t PROGMEM c231112[] = {K23, K11, K12, COMBO_END};
+const uint16_t PROGMEM c231114[] = {K23, K11, K14, COMBO_END};
+
 
 combo_t key_combos[] = {
   [C1112] = COMBO(c1112, KC_L),
@@ -53,7 +100,30 @@ combo_t key_combos[] = {
   [C1114] = COMBO(c1114, KC_Z),
   [C1221] = COMBO(c1221, KC_C),
   [C1321] = COMBO(c1321, KC_V),
+  [C1322] = COMBO(c1322, KC_SCLN),
   [C1421] = COMBO(c1421, KC_D),
+  [C1123] = COMBO(c1123, KC_U),
+  [C1223] = COMBO(c1223, KC_P),
+  [C1422] = COMBO(c1422, KC_SLSH),
+  [C1423] = COMBO(c1423, KC_G),
+  [C1124] = COMBO(c1124, KC_M),
+  [C1224] = COMBO(c1224, KC_B),
+  [C1324] = COMBO(c1324, KC_F),
+  [C1122] = COMBO(c1122, KC_COMM),
+  [C111213] = COMBO(c111213, KC_Y),
+  [C111214] = COMBO(c111214, KC_MINS),
+  [C111314] = COMBO(c111314, KC_EQL),
+  [C112213] = COMBO(c112213, KC_BSLS),
+  [C112223] = COMBO(c112223, KC_QUOT),
+  [C112324] = COMBO(c112324, KC_LBRC),
+  [C212324] = COMBO(c212324, KC_RBRC),
+  [C211213] = COMBO(c211213, KC_X),
+  [C211214] = COMBO(c211214, KC_J),
+  [C211314] = COMBO(c211314, KC_K),
+  [C212223] = COMBO(c212223, KC_W),
+  [C222324] = COMBO(c222324, KC_H),
+  [C231112] = COMBO(c231112, KC_Q),
+  [C231114] = COMBO(c231114, KC_SCLN)
 };
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -84,9 +154,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
        KC_TAB, LSFT_T(KC_A), LCTL_T(KC_S), LALT_T(KC_D), LGUI_T(KC_F),         KC_G,               LT(2,KC_BTN3),  K11,           K12,         K13,        K14,  KC_TAB,
   //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
-        MO(3),         KC_Z,         KC_X,         KC_C,         KC_V,         KC_B,               KC_N,           K21,     LT(1,K22),         K23,         K24, KC_BTN2,
+        MO(3),         KC_Z,         KC_X,         KC_C,         KC_V,         KC_B,               KC_N,           K21,           K22,         K23,         K24, KC_BTN2,
   //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
-                                                KC_BTN1, LT(1,KC_SPC),LT(2, KC_ENT),           XXXXXXX,  LT(3, KC_SPC), LT(4,KC_ENT)
+                                                KC_BTN1, LT(1,KC_SPC),LT(2, KC_ENT),           XXXXXXX,  LT(1, KC_SPC), LT(3,KC_ENT)
                                             //`------------------------------------'         `-------------------------------------'
 
   ),
@@ -95,9 +165,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
       _______,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         XXXXXXX,    XXXXXXX,    XXXXXXX,    XXXXXXX,    XXXXXXX, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      _______, _______, _______, _______, _______, _______,                      KC_EQL, KC_LEFT,  XXXXXXX,    KC_UP, KC_RIGHT, XXXXXXX,
+      _______, _______, _______, _______, _______, _______,                      KC_EQL, KC_LEFT,  KC_UP,    KC_DOWN, KC_RIGHT, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_MINS, XXXXXXX, XXXXXXX, KC_DOWN, XXXXXXX, XXXXXXX,
+      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_MINS, XXXXXXX, XXXXXXX, KC_MINS, KC_EQL, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                           _______, _______, _______,    XXXXXXX, _______, _______
                                       //`--------------------------'  `--------------------------'

@@ -88,8 +88,8 @@
     #endif
 
     // Tap for left click.
-    #define CIRQUE_PINNACLE_TAP_ENABLE
-    #define POINTING_DEVICE_GESTURES_SCROLL_ENABLE
+//    #define CIRQUE_PINNACLE_TAP_ENABLE
+//    #define POINTING_DEVICE_GESTURES_SCROLL_ENABLE
 #endif
 
 #ifdef POINTING_DEVICE_DRIVER_ps2
