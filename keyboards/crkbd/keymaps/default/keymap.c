@@ -19,8 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "math.h"
 #include QMK_KEYBOARD_H
 
+// Store the last key and modifiers
+static uint16_t last_keycode = KC_NO;
+static uint8_t last_mods = 0;
+static uint8_t last_oneshot_mods = 0;
+
 enum custom_keycodes {
     BSP_ESC = SAFE_RANGE, // Custom keycode for Backspace/Escape
+    REP_LAST, // Custom keycode to repeat last combination
     K11 = KC_E,
     K12 = KC_T,
     K13 = KC_R,
@@ -34,6 +40,7 @@ enum custom_keycodes {
 enum combos {
   C1113,
   C1112,
+  C1213,
   C1114,
   C1221,
   C1321,
@@ -65,6 +72,7 @@ enum combos {
 
 const uint16_t PROGMEM c1112[] = {K11, K12, COMBO_END};
 const uint16_t PROGMEM c1113[] = {K11, K13, COMBO_END};
+const uint16_t PROGMEM c1213[] = {K12, K13, COMBO_END};
 const uint16_t PROGMEM c1114[] = {K11, K14, COMBO_END};
 const uint16_t PROGMEM c1221[] = {K12, K21, COMBO_END};
 const uint16_t PROGMEM c1321[] = {K13, K21, COMBO_END};
@@ -97,6 +105,7 @@ const uint16_t PROGMEM c231114[] = {K23, K11, K14, COMBO_END};
 combo_t key_combos[] = {
   [C1112] = COMBO(c1112, KC_L),
   [C1113] = COMBO(c1113, KC_DOT),
+  [C1213] = COMBO(c1213, REP_LAST),
   [C1114] = COMBO(c1114, KC_Z),
   [C1221] = COMBO(c1221, KC_C),
   [C1321] = COMBO(c1321, KC_V),
@@ -129,21 +138,42 @@ combo_t key_combos[] = {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     static uint16_t tap_timer; // Timer to track tap vs hold
 
-    switch (keycode) {
-        case BSP_ESC:
-            if (record->event.pressed) {
-                tap_timer = timer_read(); // Start the timer when pressed
+    if (keycode == BSP_ESC) {
+        if (record->event.pressed) {
+            tap_timer = timer_read(); // Start the timer when pressed
+        } else {
+            if (timer_elapsed(tap_timer) < TAPPING_TERM) {
+                tap_code(KC_BSPC);  // Send Backspace on tap
             } else {
-                if (timer_elapsed(tap_timer) < TAPPING_TERM) {
-                    tap_code(KC_BSPC);  // Send Backspace on tap
-                } else {
-                    tap_code(KC_ESC);   // Send Escape on hold
-                }
+                tap_code(KC_ESC);   // Send Escape on hold
             }
-            return false;  // Skip further processing for this key
-        default:
-            return true;   // Process other keycodes normally
+        }
+        return false;  // Skip further processing for this key
     }
+    if (record->event.pressed) {
+        if (keycode == REP_LAST) {
+            // Replay the last key combo
+            if (last_keycode != KC_NO) {
+                // Press stored modifiers
+                register_mods(last_mods);
+                register_mods(last_oneshot_mods);
+                // Press and release last key
+                register_code(last_keycode);
+                unregister_code(last_keycode);
+                // Release stored modifiers
+                unregister_mods(last_mods);
+                unregister_mods(last_oneshot_mods);
+            }
+            return false; // Stop processing further
+        } else if (keycode != KC_BTN1
+                    && keycode != KC_BTN2) {
+            // Store the key and current modifiers
+            last_keycode = keycode;
+            last_mods = get_mods(); // Get currently active modifiers
+            last_oneshot_mods = get_oneshot_mods();
+        }
+    }
+    return true;
 }
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -163,9 +193,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [1] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-      _______,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         XXXXXXX,    KC_MINS,    KC_UP,    KC_EQL,    XXXXXXX, XXXXXXX,
+      _______,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                      XXXXXXX, XXXXXXX, KC_MINS,    KC_UP,    KC_EQL,    XXXXXXX,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      _______, _______, _______, _______, _______, _______,                      XXXXXXX, KC_LEFT,  KC_DOWN,    KC_RIGHT, XXXXXXX, _______,
+      _______, _______, _______, _______, _______, _______,                      XXXXXXX,XXXXXXX, KC_LEFT,  KC_DOWN,    KC_RIGHT, _______,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
@@ -217,11 +247,24 @@ int accumulated_arrow_y = 0;
 #define BRIGHT_STEP_X 40
 int accumulated_volume_y = 0;
 int accumulated_bright_x = 0;
-
+// Define the rotation angle in degrees
+#define ROTATION_ANGLE_DEGREES 15
+float cos_theta = 0.9659258262;
+float sin_theta = -0.2588190451;
 
 // add non-linear scaling to all mouse movements
 report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
+    // Original coordinates
+    int16_t x = mouse_report.x;
+    int16_t y = mouse_report.y;
 
+    // Rotate the coordinates
+    int16_t x_new = (int16_t)(x * cos_theta - y * sin_theta);
+    int16_t y_new = (int16_t)(x * sin_theta + y * cos_theta);
+
+    // Update the mouse report
+    mouse_report.x = x_new;
+    mouse_report.y = y_new;
     // arrow key emulation
     if (layer_state_is(1)) {
         accumulated_arrow_x += mouse_report.x;
