@@ -21,49 +21,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 enum combos {
-  LEFT_COMBO,
-  UP_COMBO,
-  DOWN_COMBO,
-  RIGHT_COMBO
+  MOUSE_COMBO
 };
 
-const uint16_t PROGMEM left_combo[] = {KC_M, KC_BSPC, COMBO_END};
-const uint16_t PROGMEM up_combo[] = {KC_COMM, KC_BSPC, COMBO_END};
-const uint16_t PROGMEM down_combo[] = {KC_DOT, KC_BSPC, COMBO_END};
-const uint16_t PROGMEM right_combo[] = {KC_SLSH, KC_BSPC, COMBO_END};
+const uint16_t PROGMEM mouse_combo[] = {KC_U, KC_I, COMBO_END};
 
 combo_t key_combos[] = {
-  [LEFT_COMBO] = COMBO(left_combo, KC_LEFT),
-  [UP_COMBO] = COMBO(up_combo, KC_UP),
-  [DOWN_COMBO] = COMBO(down_combo, KC_DOWN),
-  [RIGHT_COMBO] = COMBO(right_combo, KC_RIGHT),
+  [MOUSE_COMBO] = COMBO(mouse_combo, KC_BTN1)
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT_split_3x6_3(
-
-  //,------------------------------------------------------------------------------.          ,----------------------------------------------------------------------------.
-       KC_GRV,         KC_Q,         KC_W,         KC_E,         KC_R,         KC_T,               KC_Y,          KC_U,         KC_I,         KC_O,            KC_P, KC_LBRC,
-  //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
-       KC_TAB, LSFT_T(KC_A), LCTL_T(KC_S), LALT_T(KC_D), LGUI_T(KC_F),         KC_G,               KC_H, LGUI_T(KC_J), LALT_T(KC_K), LCTL_T(KC_L), LSFT_T(KC_SCLN), KC_QUOT,
-  //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
-        MO(3),         KC_Z,         KC_X,         KC_C,         KC_V,         KC_B,               KC_N,          KC_M,      KC_COMM,       KC_DOT,         KC_SLSH, KC_BTN2,
-  //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
-                                                KC_BTN1, LT(1,KC_SPC),LT(2, KC_ENT),           XXXXXXX,       KC_BSPC,       KC_ESC
-                                            //`------------------------------------'         `-------------------------------------'
-
+      //,------------------------------------------------------------------------------.          ,----------------------------------------------------------------------------.
+           KC_GRV,         KC_Q,         KC_W,         KC_E,         KC_R,         KC_T,               KC_Y,          KC_U,         KC_I,         KC_O,            KC_P, KC_LBRC,
+      //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
+           KC_TAB, LSFT_T(KC_A), LCTL_T(KC_S), LALT_T(KC_D), LGUI_T(KC_F),         KC_G,               KC_H,  LGUI_T(KC_J), LALT_T(KC_K), LCTL_T(KC_L), LSFT_T(KC_SCLN), KC_QUOT,
+      //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
+            MO(4),         KC_Z,         KC_X,   LT(1,KC_C),   LT(2,KC_V),         KC_B,               KC_N,    LT(2,KC_M),LT(3,KC_COMM),       KC_DOT,         KC_SLSH, KC_BTN2,
+      //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
+                                                    KC_BTN1,LT(1,KC_BSPC),LT(2, KC_ESC),            XXXXXXX,  LT(1,KC_SPC), LT(2,KC_ENT)
   ),
 
     [1] = LAYOUT_split_3x6_3(
-  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-      _______,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0, KC_RBRC,
-  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      _______, _______, _______, _______, _______, _______,                      KC_EQL, KC_LEFT,   KC_UP, KC_DOWN, KC_RIGHT, KC_BSLS,
-  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_MINS, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                          _______, _______, _______,    XXXXXXX, _______, _______
-                                      //`--------------------------'  `--------------------------'
+    //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+          _______,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0, KC_RBRC,
+      //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+          _______, _______, _______, _______, _______, _______,                       KC_EQL,    KC_4,    KC_5,    KC_6, KC_PLUS, KC_BSLS,
+      //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+          XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_MINS,    KC_1,    KC_2,    KC_3, KC_PIPE, XXXXXXX,
+      //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+                                              _______, _______, _______,    _______,    KC_0, KC_PDOT
+
   ),
 
     [2] = LAYOUT_split_3x6_3(
@@ -79,6 +67,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
     [3] = LAYOUT_split_3x6_3(
+  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+      XXXXXXX, _______, _______, _______, _______, XXXXXXX,                      XXXXXXX, KC_LEFT, XXXXXXX,   KC_UP,KC_RIGHT, XXXXXXX,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, _______, KC_DOWN, XXXXXXX, XXXXXXX,
+  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+                                          _______, _______, _______,    XXXXXXX, _______, _______
+                                      //`--------------------------'  `--------------------------'
+  ),
+    [4] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
       QK_BOOT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
@@ -116,7 +115,7 @@ int accumulated_bright_x = 0;
 report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
 
     // arrow key emulation
-    if (layer_state_is(1)) {
+    if (layer_state_is(3)) {
         accumulated_arrow_x += mouse_report.x;
         accumulated_arrow_y += mouse_report.y;
 
@@ -148,7 +147,7 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
     }
 
     // volume and brightness
-    if (layer_state_is(3)) {
+    if (layer_state_is(4)) {
         accumulated_bright_x += mouse_report.x;
         accumulated_volume_y += mouse_report.y;
 
