@@ -41,34 +41,45 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
            KC_TAB, LSFT_T(KC_A), LCTL_T(KC_S), LALT_T(KC_D), LGUI_T(KC_F),         KC_G,               KC_H,  LGUI_T(KC_J), LALT_T(KC_K), LCTL_T(KC_L), LSFT_T(KC_SCLN), KC_QUOT,
       //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
-            MO(3),         KC_Z,         KC_X,   LT(1,KC_C),   LT(2,KC_V),         KC_B,               KC_N,    LT(2,KC_M),LT(1,KC_COMM),       KC_DOT,         KC_SLSH, KC_BTN2,
+            MO(4),         KC_Z,         KC_X,   LT(1,KC_C),   LT(2,KC_V),         KC_B,               KC_N,    LT(2,KC_M),LT(3,KC_COMM),       KC_DOT,         KC_SLSH, KC_BTN2,
       //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
                         KC_LALT,LT(2, KC_ENT),      KC_BTN1,LT(1,KC_BSPC),LT(2, KC_ESC),       LT(2,KC_ENT),  LT(1,KC_SPC),      XXXXXXX,      XXXXXXX,   KC_BTN3
   ),
 
   [1] = LAYOUT_universal(
     //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-          _______,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0, KC_RBRC,
+          XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0, KC_RBRC,
       //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-          _______, _______, _______, _______, _______, _______,                       KC_EQL, KC_LEFT,   KC_UP,   KC_UP,KC_RIGHT, KC_BSLS,
+          XXXXXXX, _______, _______, _______, _______, XXXXXXX,                       KC_EQL,    KC_4,    KC_5,    KC_6, XXXXXXX, KC_BSLS,
       //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-          XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_MINS, XXXXXXX, XXXXXXX, KC_DOWN, XXXXXXX, XXXXXXX,
+          XXXXXXX, XXXXXXX, XXXXXXX, _______, XXXXXXX, XXXXXXX,                      KC_MINS,    KC_1,    KC_2,    KC_3, XXXXXXX, XXXXXXX,
       //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                            _______, _______, _______, _______, _______,    _______, _______, _______, _______, _______
+                            _______, _______, _______, _______, _______,    KC_PDOT,    KC_0, _______, _______, _______
   ),
 
   [2] = LAYOUT_universal(
     //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-           KC_F11,   KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                        KC_F6,   KC_F7,   KC_F8,   KC_F9,  KC_F10,  KC_F12,
+          XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                       KC_F12,   KC_F7,   KC_F8,   KC_F9, KC_LCBR, KC_RCBR,
       //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-          _______, _______, _______, _______, _______, _______,                      _______,  LGUI_T(KC_J), LALT_T(KC_K), LCTL_T(KC_L), LSFT_T(KC_SCLN),  KC_GRV,
+          XXXXXXX, _______, _______, _______, _______, XXXXXXX,                      KC_F11,  KC_F4, KC_F5, KC_F6, KC_BSLS,  KC_GRV,
       //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-          _______, _______, _______, _______, _______, _______,                      KC_BSLS, _______, KC_LCBR, KC_RCBR, KC_PIPE, KC_TILD,
+          XXXXXXX, XXXXXXX, XXXXXXX, _______, _______, XXXXXXX,                      KC_F10, KC_F1, KC_F2, KC_F3, KC_PIPE, KC_TILD,
       //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                             _______, _______, _______, _______, _______,    _______, _______, _______, _______, _______
   ),
 
   [3] = LAYOUT_universal(
+    //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+          _______, _______, _______, _______, _______, _______,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
+      //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+          _______, _______, _______, _______, _______, _______,                      XXXXXXX, KC_LEFT, XXXXXXX,   KC_UP,KC_RIGHT, XXXXXXX,
+      //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+          _______, _______, _______, _______, _______, _______,                      XXXXXXX, XXXXXXX, _______, KC_DOWN, XXXXXXX, XXXXXXX,
+      //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+                            _______, _______, _______, _______, _______,    _______, _______, _______, _______, _______
+  ),
+
+  [4] = LAYOUT_universal(
     RGB_TOG  , AML_TO   , AML_I50  , AML_D50  , _______  , _______  ,                                        RGB_M_P  , RGB_M_B  , RGB_M_R  , RGB_M_SW , RGB_M_SN , RGB_M_K  ,
     RGB_MOD  , RGB_HUI  , RGB_SAI  , RGB_VAI  , _______  , SCRL_DVI ,                                        RGB_M_X  , RGB_M_G  , RGB_M_T  , RGB_M_TW , _______  , _______  ,
     RGB_RMOD , RGB_HUD  , RGB_SAD  , RGB_VAD  , _______  , SCRL_DVD ,                                        CPI_D1K  , CPI_D100 , CPI_I100 , CPI_I1K  , _______  , KBC_SAVE ,
@@ -100,7 +111,7 @@ int accumulated_bright_x = 0;
 report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
 
     // arrow key emulation
-    if (layer_state_is(1)) {
+    if (layer_state_is(3)) {
         accumulated_arrow_x += mouse_report.x;
         accumulated_arrow_y += mouse_report.y;
 
@@ -132,7 +143,7 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
     }
 
     // volume and brightness
-    if (layer_state_is(3)) {
+    if (layer_state_is(4)) {
         accumulated_bright_x += mouse_report.x;
         accumulated_volume_y += mouse_report.y;
 

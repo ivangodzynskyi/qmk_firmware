@@ -37,7 +37,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
            KC_TAB, LSFT_T(KC_A), LCTL_T(KC_S), LALT_T(KC_D), LGUI_T(KC_F),         KC_G,               KC_H,  LGUI_T(KC_J), LALT_T(KC_K), LCTL_T(KC_L), LSFT_T(KC_SCLN), KC_QUOT,
       //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
-            MO(4),         KC_Z,         KC_X,   LT(1,KC_C),   LT(2,KC_V),         KC_B,               KC_N,    LT(2,KC_M),LT(3,KC_COMM),       KC_DOT,         KC_SLSH, KC_BTN2,
+            MO(4),         KC_Z,         KC_X,         KC_C,   LT(2,KC_V),         KC_B,               KC_N,    LT(2,KC_M),LT(3,KC_COMM),       KC_DOT,         KC_SLSH, KC_BTN2,
       //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
                                                     KC_BTN1,LT(1,KC_BSPC),LT(2, KC_ESC),            XXXXXXX,  LT(1,KC_SPC), LT(2,KC_ENT)
   ),
@@ -56,11 +56,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [2] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-       KC_F11,   KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                        KC_F6,   KC_F7,   KC_F8,   KC_F9,  KC_F10,  KC_F12,
+       KC_F11,   KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                       KC_F12,   KC_F7,   KC_F8,   KC_F9,  KC_F10,  KC_F12,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      _______, _______, _______, _______, _______, _______,                      KC_MINS,  KC_EQL, KC_LBRC, KC_RBRC, KC_BSLS,  KC_GRV,
+      _______, _______, _______, _______, _______, _______,                       KC_F11,   KC_F4,   KC_F5,   KC_F6, KC_BSLS,  KC_GRV,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      _______, _______, _______, _______, _______, _______,                      KC_UNDS, KC_PLUS, KC_LCBR, KC_RCBR, KC_PIPE, KC_TILD,
+      _______, _______, _______, _______, _______, _______,                       KC_F10,   KC_F1,   KC_F2,   KC_F3, KC_PIPE, KC_TILD,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                           _______,  KC_SPC, _______,    XXXXXXX, _______, _______
                                       //`--------------------------'  `--------------------------'
@@ -113,6 +113,14 @@ int accumulated_bright_x = 0;
 
 // add non-linear scaling to all mouse movements
 report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
+    float x = mouse_report.x;
+    float y = mouse_report.y;
+
+    float cos15 = 0.9659;
+    float sin15 = 0.2588;
+
+    mouse_report.x = (int8_t)(x * cos15 + y * sin15);
+    mouse_report.y = (int8_t)(-x * sin15 + y * cos15);
 
     // arrow key emulation
     if (layer_state_is(3)) {
