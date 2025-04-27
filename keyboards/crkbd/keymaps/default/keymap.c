@@ -21,13 +21,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 enum combos {
-  MOUSE_COMBO
+  MOUSE_COMBO,
+  MOUSE_COMBO3,
+  ENTER_COMBO
 };
 
 const uint16_t PROGMEM mouse_combo[] = {KC_U, KC_I, COMBO_END};
+const uint16_t PROGMEM mouse_combo3[] = {KC_O, KC_P, COMBO_END};
+const uint16_t PROGMEM enter_combo[] = {KC_O, KC_I, COMBO_END};
 
 combo_t key_combos[] = {
-  [MOUSE_COMBO] = COMBO(mouse_combo, KC_BTN1)
+  [MOUSE_COMBO] = COMBO(mouse_combo, KC_BTN1),
+  [MOUSE_COMBO3] = COMBO(mouse_combo3, KC_BTN3),
+  [ENTER_COMBO] = COMBO(enter_combo, KC_ENT)
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -37,9 +43,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
            KC_TAB, LSFT_T(KC_A), LCTL_T(KC_S), LALT_T(KC_D), LGUI_T(KC_F),         KC_G,               KC_H,  LGUI_T(KC_J), LALT_T(KC_K), LCTL_T(KC_L), LSFT_T(KC_SCLN), KC_QUOT,
       //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
-            MO(4),         KC_Z,         KC_X,         KC_C,   LT(2,KC_V),         KC_B,               KC_N,    LT(2,KC_M),LT(3,KC_COMM),       KC_DOT,         KC_SLSH, KC_BTN2,
+     LT(4,KC_ENT),         KC_Z,         KC_X,         KC_C,   LT(2,KC_V),         KC_B,               KC_N,    LT(2,KC_M),LT(3,KC_COMM),       KC_DOT,         KC_SLSH, KC_BTN2,
       //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
-                                                    KC_BTN1,LT(1,KC_BSPC),LT(2, KC_ESC),            XXXXXXX,  LT(1,KC_SPC), LT(2,KC_ENT)
+                                                    KC_BTN1,LT(1,KC_BSPC),LT(2, KC_ESC),            XXXXXXX,  LT(1,KC_SPC), XXXXXXX
   ),
 
     [1] = LAYOUT_split_3x6_3(
@@ -116,11 +122,11 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
     float x = mouse_report.x;
     float y = mouse_report.y;
 
-    float cos15 = 0.9659;
-    float sin15 = 0.2588;
+    float cos30 = 1;
+    float sin30 = 0;
 
-    mouse_report.x = (int8_t)(x * cos15 + y * sin15);
-    mouse_report.y = (int8_t)(-x * sin15 + y * cos15);
+    mouse_report.x = (int8_t)(x * cos30 + y * sin30);
+    mouse_report.y = (int8_t)(-x * sin30 + y * cos30);
 
     // arrow key emulation
     if (layer_state_is(3)) {
