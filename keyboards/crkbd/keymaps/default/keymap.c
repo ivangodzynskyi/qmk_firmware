@@ -122,8 +122,8 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
     float x = mouse_report.x;
     float y = mouse_report.y;
 
-    float cos30 = 1;
-    float sin30 = 0;
+    float cos30 = 0.9659258;
+    float sin30 = -0.2588190;
 
     mouse_report.x = (int8_t)(x * cos30 + y * sin30);
     mouse_report.y = (int8_t)(-x * sin30 + y * cos30);
