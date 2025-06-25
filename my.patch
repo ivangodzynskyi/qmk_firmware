@@ -1,0 +1,1258 @@
+Subject: [PATCH] rotate to 15 degrees clockwise
+Adopt after moving the trackpad inside the right hand
+Change the numbers and F approach for both keyboards
+Make the touchpad setup the same as keyball44
+Add last_rep function
+Adopt for thumb position trackpad
+Configure One-hand project
+Some adjustments
+Some adjustments
+First attempts and it works
+---
+Index: keyboards/crkbd/keymaps/default/config.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/keyboards/crkbd/keymaps/default/config.h b/keyboards/crkbd/keymaps/default/config.h
+--- a/keyboards/crkbd/keymaps/default/config.h	(revision 34e9660fea1eb19e721f97e7fc804c3bee2716bb)
++++ b/keyboards/crkbd/keymaps/default/config.h	(revision fffb5a574e711c78bd987bcc8e9c3f35e3fa574e)
+@@ -24,26 +24,10 @@
+ 
+ /* Select hand configuration */
+ 
+-#define MASTER_LEFT
++#define MASTER_RIGHT
+ // #define MASTER_RIGHT
+ // #define EE_HANDS
+ 
+ //#define QUICK_TAP_TERM 0
+-//#define TAPPING_TERM 100
+-
+-#ifdef RGBLIGHT_ENABLE
+-    #define RGBLIGHT_EFFECT_BREATHING
+-    #define RGBLIGHT_EFFECT_RAINBOW_MOOD
+-    #define RGBLIGHT_EFFECT_RAINBOW_SWIRL
+-    #define RGBLIGHT_EFFECT_SNAKE
+-    #define RGBLIGHT_EFFECT_KNIGHT
+-    #define RGBLIGHT_EFFECT_CHRISTMAS
+-    #define RGBLIGHT_EFFECT_STATIC_GRADIENT
+-    #define RGBLIGHT_EFFECT_RGB_TEST
+-    #define RGBLIGHT_EFFECT_ALTERNATING
+-    #define RGBLIGHT_EFFECT_TWINKLE
+-    #define RGBLIGHT_LIMIT_VAL 120
+-    #define RGBLIGHT_HUE_STEP 10
+-    #define RGBLIGHT_SAT_STEP 17
+-    #define RGBLIGHT_VAL_STEP 17
+-#endif
++#define TAPPING_TERM 200
++#define PERMISSIVE_HOLD
+Index: keyboards/crkbd/keymaps/default/keymap.c
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/keyboards/crkbd/keymaps/default/keymap.c b/keyboards/crkbd/keymaps/default/keymap.c
+--- a/keyboards/crkbd/keymaps/default/keymap.c	(revision 34e9660fea1eb19e721f97e7fc804c3bee2716bb)
++++ b/keyboards/crkbd/keymaps/default/keymap.c	(revision fc6a7e236d6d3cafcd9c4b936107c8112c9b9906)
+@@ -15,56 +15,217 @@
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+-
++#include "action.h"
++#include "math.h"
+ #include QMK_KEYBOARD_H
+ 
++
++enum combos {
++  MOUSE_COMBO,
++  MOUSE_COMBO3,
++  ENTER_COMBO
++};
++
++const uint16_t PROGMEM mouse_combo[] = {KC_U, KC_I, COMBO_END};
++const uint16_t PROGMEM mouse_combo3[] = {KC_O, KC_P, COMBO_END};
++const uint16_t PROGMEM enter_combo[] = {KC_O, KC_I, COMBO_END};
++
++combo_t key_combos[] = {
++  [MOUSE_COMBO] = COMBO(mouse_combo, KC_BTN1),
++  [MOUSE_COMBO3] = COMBO(mouse_combo3, KC_BTN3),
++  [ENTER_COMBO] = COMBO(enter_combo, KC_ENT)
++};
++
+ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+     [0] = LAYOUT_split_3x6_3(
+-  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+-       KC_TAB,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,   KC_P,  KC_BSPC,
+-  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+-      KC_LCTL,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                         KC_H,    KC_J,    KC_K,    KC_L, KC_SCLN, KC_QUOT,
+-  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+-      KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,  KC_ESC,
+-  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+-                                          KC_LGUI,   MO(1),  KC_SPC,     KC_ENT,   MO(2), KC_RALT
+-                                      //`--------------------------'  `--------------------------'
++      //,------------------------------------------------------------------------------.          ,----------------------------------------------------------------------------.
++           KC_GRV,         KC_Q,         KC_W,         KC_E,         KC_R,         KC_T,               KC_Y,          KC_U,         KC_I,         KC_O,            KC_P, KC_LBRC,
++      //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
++           KC_TAB, LSFT_T(KC_A), LCTL_T(KC_S), LALT_T(KC_D), LGUI_T(KC_F),         KC_G,               KC_H,  LGUI_T(KC_J), LALT_T(KC_K), LCTL_T(KC_L), LSFT_T(KC_SCLN), KC_QUOT,
++      //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
++     LT(4,KC_ENT),         KC_Z,         KC_X,         KC_C,   LT(2,KC_V),         KC_B,               KC_N,    LT(2,KC_M),LT(3,KC_COMM),       KC_DOT,         KC_SLSH, KC_BTN2,
++      //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
++                                                    KC_BTN1,LT(1,KC_BSPC),LT(2, KC_ESC),            XXXXXXX,  LT(1,KC_SPC), XXXXXXX
++  ),
++
++    [1] = LAYOUT_split_3x6_3(
++    //,-----------------------------------------------------.                    ,-----------------------------------------------------.
++          _______,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0, KC_RBRC,
++      //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
++          _______, _______, _______, _______, _______, _______,                       KC_EQL,    KC_4,    KC_5,    KC_6, KC_PLUS, KC_BSLS,
++      //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
++          XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_MINS,    KC_1,    KC_2,    KC_3, KC_PIPE, XXXXXXX,
++      //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
++                                              _______, _______, _______,    _______,    KC_0, KC_PDOT
+ 
+   ),
+ 
+-    [1] = LAYOUT_split_3x6_3(
++    [2] = LAYOUT_split_3x6_3(
+   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+-       KC_TAB,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0, KC_BSPC,
++       KC_F11,   KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                       KC_F12,   KC_F7,   KC_F8,   KC_F9,  KC_F10,  KC_F12,
+   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+-      KC_LCTL, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_LEFT, KC_DOWN,   KC_UP,KC_RIGHT, XXXXXXX, XXXXXXX,
++      _______, _______, _______, _______, _______, _______,                       KC_F11,   KC_F4,   KC_F5,   KC_F6, KC_BSLS,  KC_GRV,
+   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+-      KC_LSFT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
++      _______, _______, _______, _______, _______, _______,                       KC_F10,   KC_F1,   KC_F2,   KC_F3, KC_PIPE, KC_TILD,
+   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+-                                          KC_LGUI, _______,  KC_SPC,     KC_ENT,   MO(3), KC_RALT
++                                          _______,  KC_SPC, _______,    XXXXXXX, _______, _______
+                                       //`--------------------------'  `--------------------------'
+   ),
+ 
+-    [2] = LAYOUT_split_3x6_3(
++    [3] = LAYOUT_split_3x6_3(
+   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+-       KC_TAB, KC_EXLM,   KC_AT, KC_HASH,  KC_DLR, KC_PERC,                      KC_CIRC, KC_AMPR, KC_ASTR, KC_LPRN, KC_RPRN, KC_BSPC,
++      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
+   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+-      KC_LCTL, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_MINS,  KC_EQL, KC_LBRC, KC_RBRC, KC_BSLS,  KC_GRV,
++      XXXXXXX, _______, _______, _______, _______, XXXXXXX,                      XXXXXXX, KC_LEFT, XXXXXXX,   KC_UP,KC_RIGHT, XXXXXXX,
+   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+-      KC_LSFT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_UNDS, KC_PLUS, KC_LCBR, KC_RCBR, KC_PIPE, KC_TILD,
++      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, _______, KC_DOWN, XXXXXXX, XXXXXXX,
+   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+-                                          KC_LGUI,   MO(3),  KC_SPC,     KC_ENT, _______, KC_RALT
++                                          _______, _______, _______,    XXXXXXX, _______, _______
+                                       //`--------------------------'  `--------------------------'
+   ),
+-
+-    [3] = LAYOUT_split_3x6_3(
++    [4] = LAYOUT_split_3x6_3(
+   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+-        QK_BOOT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
++      QK_BOOT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
+   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+       RGB_TOG, RGB_HUI, RGB_SAI, RGB_VAI, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
+   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+-      RGB_MOD, RGB_HUD, RGB_SAD, RGB_VAD, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
++      XXXXXXX, RGB_HUD, RGB_SAD, RGB_VAD, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
+   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+-                                          KC_LGUI, _______,  KC_SPC,     KC_ENT, _______, KC_RALT
++                                          _______, _______, _______,    XXXXXXX, _______, _______
+                                       //`--------------------------'  `--------------------------'
+   )
+ };
++
++
++#define SCROLL_STEP_H 10
++#define SCROLL_STEP_V 10
++#define SCROLL_VALUE 1
++float scroll_accumulated_h = 0;
++float scroll_accumulated_v = 0;
++
++
++// Arrow keys slight slowing
++#define ARROW_STEP_X 20
++#define ARROW_STEP_Y 20
++int accumulated_arrow_x = 0;
++int accumulated_arrow_y = 0;
++
++// Arrow keys slight slowing
++#define VOLUME_STEP_Y 40
++#define BRIGHT_STEP_X 40
++int accumulated_volume_y = 0;
++int accumulated_bright_x = 0;
++
++
++// add non-linear scaling to all mouse movements
++report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
++    float x = mouse_report.x;
++    float y = mouse_report.y;
++
++    float cos30 = 0.9659258;
++    float sin30 = -0.2588190;
++
++    mouse_report.x = (int8_t)(x * cos30 + y * sin30);
++    mouse_report.y = (int8_t)(-x * sin30 + y * cos30);
++
++    // arrow key emulation
++    if (layer_state_is(3)) {
++        accumulated_arrow_x += mouse_report.x;
++        accumulated_arrow_y += mouse_report.y;
++
++        if (accumulated_arrow_x < -ARROW_STEP_X) {
++            tap_code(KC_LEFT);
++            accumulated_arrow_x = 0;
++            accumulated_arrow_y = 0;
++        }
++        if (accumulated_arrow_x > ARROW_STEP_X) {
++            tap_code(KC_RIGHT);
++            accumulated_arrow_x = 0;
++            accumulated_arrow_y = 0;
++        }
++        if (accumulated_arrow_y > ARROW_STEP_Y) {
++            tap_code(KC_DOWN);
++            accumulated_arrow_x = 0;
++            accumulated_arrow_y = 0;
++        }
++        if (accumulated_arrow_y < -ARROW_STEP_Y) {
++            tap_code(KC_UP);
++            accumulated_arrow_x = 0;
++            accumulated_arrow_y = 0;
++        }
++
++        // return a null report
++        mouse_report.x = 0;
++        mouse_report.y = 0;
++        return mouse_report;
++    }
++
++    // volume and brightness
++    if (layer_state_is(4)) {
++        accumulated_bright_x += mouse_report.x;
++        accumulated_volume_y += mouse_report.y;
++
++        if (accumulated_bright_x < -BRIGHT_STEP_X) {
++            tap_code(KC_BRID);
++            accumulated_bright_x = 0;
++            accumulated_volume_y = 0;
++        }
++        if (accumulated_bright_x > BRIGHT_STEP_X) {
++            tap_code(KC_BRIU);
++            accumulated_bright_x = 0;
++            accumulated_volume_y = 0;
++        }
++        if (accumulated_volume_y > VOLUME_STEP_Y) {
++            tap_code(KC_VOLD);
++            accumulated_bright_x = 0;
++            accumulated_volume_y = 0;
++        }
++        if (accumulated_volume_y < -VOLUME_STEP_Y) {
++            tap_code(KC_VOLU);
++            accumulated_bright_x = 0;
++            accumulated_volume_y = 0;
++        }
++
++        // return a null report
++        mouse_report.x = 0;
++        mouse_report.y = 0;
++        return mouse_report;
++    }
++
++    if (layer_state_is(2)) {
++        // Calculate and accumulate scroll values based on mouse movement and divisors
++         scroll_accumulated_h += (float)mouse_report.x;
++         scroll_accumulated_v += (float)mouse_report.y;
++
++
++        if (fabs(scroll_accumulated_v) >= SCROLL_STEP_V) {
++            if (scroll_accumulated_v > 0) {
++             mouse_report.v = (float)SCROLL_VALUE;
++            } else {
++             mouse_report.v = -(float)SCROLL_VALUE;
++            }
++            scroll_accumulated_v = 0;
++            scroll_accumulated_h = 0;
++        }
++        if (fabs(scroll_accumulated_h) >= SCROLL_STEP_H) {
++            if (scroll_accumulated_h > 0) {
++                mouse_report.h = -(float)SCROLL_VALUE;
++            } else {
++                mouse_report.h = (float)SCROLL_VALUE;
++            }
++            scroll_accumulated_h = 0;
++            scroll_accumulated_v = 0;
++
++        }
++
++        // Clear the X and Y values of the mouse report
++        mouse_report.x = 0;
++        mouse_report.y = 0;
++    }
++    if (get_mods() & MOD_MASK_SHIFT) {
++        mouse_report.x *= 3;
++        mouse_report.y *= 3;
++    }
++    return mouse_report;
++}
++
+Index: keyboards/crkbd/keymaps/ivangodzynskyi/config.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/keyboards/crkbd/keymaps/ivangodzynskyi/config.h b/keyboards/crkbd/keymaps/ivangodzynskyi/config.h
+new file mode 100644
+--- /dev/null	(revision 69df42d9994b72522347f7cac13a0d55b752e246)
++++ b/keyboards/crkbd/keymaps/ivangodzynskyi/config.h	(revision 69df42d9994b72522347f7cac13a0d55b752e246)
+@@ -0,0 +1,31 @@
++/*
++This is the c configuration file for the keymap
++
++Copyright 2012 Jun Wako <wakojun@gmail.com>
++Copyright 2015 Jack Humbert
++
++This program is free software: you can redistribute it and/or modify
++it under the terms of the GNU General Public License as published by
++the Free Software Foundation, either version 2 of the License, or
++(at your option) any later version.
++
++This program is distributed in the hope that it will be useful,
++but WITHOUT ANY WARRANTY; without even the implied warranty of
++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++GNU General Public License for more details.
++
++You should have received a copy of the GNU General Public License
++along with this program.  If not, see <http://www.gnu.org/licenses/>.
++*/
++
++#pragma once
++
++#define MASTER_RIGHT
++
++#define PERMISSIVE_HOLD
++
++#define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
++
++#define POINTING_DEVICE_ROTATION_270
++#define MOUSE_EXTENDED_REPORT
++#define PIMORONI_TRACKBALL_SCALE    
+\ No newline at end of file
+Index: keyboards/crkbd/keymaps/ivangodzynskyi/keymap.c
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/keyboards/crkbd/keymaps/ivangodzynskyi/keymap.c b/keyboards/crkbd/keymaps/ivangodzynskyi/keymap.c
+new file mode 100644
+--- /dev/null	(revision 69df42d9994b72522347f7cac13a0d55b752e246)
++++ b/keyboards/crkbd/keymaps/ivangodzynskyi/keymap.c	(revision 69df42d9994b72522347f7cac13a0d55b752e246)
+@@ -0,0 +1,174 @@
++/*
++Copyright 2019 @foostan
++Copyright 2020 Drashna Jaelre <@drashna>
++
++This program is free software: you can redistribute it and/or modify
++it under the terms of the GNU General Public License as published by
++the Free Software Foundation, either version 2 of the License, or
++(at your option) any later version.
++
++This program is distributed in the hope that it will be useful,
++but WITHOUT ANY WARRANTY; without even the implied warranty of
++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++GNU General Public License for more details.
++
++You should have received a copy of the GNU General Public License
++along with this program.  If not, see <http://www.gnu.org/licenses/>.
++*/
++
++#include QMK_KEYBOARD_H
++
++#define BW_TAP_TIME 200  //configure max tap time, 200ms here
++
++enum custom_keycodes {
++  BW_BSPC_L1 = SAFE_RANGE,
++  BW_TAB_L2,
++  BW_BSPC_L3,
++  BW_TAB_L3,
++  BW_DELETE_CMD,
++  BW_ENTER_CTL,
++  BW_ESC_ALT
++};
++
++
++bool process_record_user(uint16_t keycode, keyrecord_t *record) {
++  static uint16_t bspc_l1_timer;
++  static uint16_t tab_l2_timer;
++  static uint16_t bspc_l3_timer;
++  static uint16_t tab_l3_timer;
++  static uint16_t delete_cmd_timer;
++  static uint16_t enter_ctl_timer;
++  static uint16_t esc_alt_timer;
++  switch (keycode) {
++    // combined backspace and layer 1 key
++    case BW_BSPC_L1:
++      if (record->event.pressed) {
++        bspc_l1_timer = timer_read();
++        layer_on(1); 
++      } else {
++        layer_off(1); 
++        if (timer_elapsed(bspc_l1_timer) < BW_TAP_TIME)
++          tap_code(KC_BSPC);
++      }
++      return false;
++    // combined tab and layer 2 key
++    case BW_TAB_L2:
++      if (record->event.pressed) {
++        tab_l2_timer = timer_read();
++        layer_on(2); 
++      } else {
++        layer_off(2);
++        if (timer_elapsed(tab_l2_timer) < BW_TAP_TIME)
++          tap_code(KC_TAB);
++      }
++      return false;
++      // combined backspace and layer 3 key
++    case BW_BSPC_L3:
++      if (record->event.pressed) {
++        bspc_l3_timer = timer_read();
++        layer_on(3); 
++      } else {
++        layer_off(3); 
++        if (timer_elapsed(bspc_l3_timer) < BW_TAP_TIME)
++          tap_code(KC_BSPC);
++      }
++      return false;
++    // combined tab and layer 3 key
++    case BW_TAB_L3:
++      if (record->event.pressed) {
++        tab_l3_timer = timer_read();
++        layer_on(3); 
++      } else {
++        layer_off(3);
++        if (timer_elapsed(tab_l3_timer) < BW_TAP_TIME)
++          tap_code(KC_TAB);
++      }
++      return false;
++    // combined delete and command key
++    case BW_DELETE_CMD:
++      if (record->event.pressed) {
++        delete_cmd_timer = timer_read();
++        register_code(KC_LGUI); 
++      } else {
++        unregister_code(KC_LGUI); 
++        if (timer_elapsed(delete_cmd_timer) < BW_TAP_TIME)
++          tap_code(KC_DEL);
++      }
++      return false;
++    // combined enter and control key
++    case BW_ENTER_CTL:
++      if (record->event.pressed) {
++        enter_ctl_timer = timer_read();
++        register_code(KC_LCTL); 
++      } else {
++        unregister_code(KC_LCTL); 
++        if (timer_elapsed(enter_ctl_timer) < BW_TAP_TIME)
++          tap_code(KC_ENT);
++      }
++      return false;
++    // combined escape and alt key
++    case BW_ESC_ALT:
++      if (record->event.pressed) {
++        esc_alt_timer = timer_read();
++        register_code(KC_RALT); 
++      } else {
++        unregister_code(KC_RALT); 
++        if (timer_elapsed(esc_alt_timer) < BW_TAP_TIME)
++          tap_code(KC_ESC);
++      }
++      return false; 
++  }
++  return true;
++}
++
++
++const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
++    [0] = LAYOUT_split_3x6_3(
++  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
++       KC_TAB,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,   KC_P,  KC_BSPC,
++  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
++      KC_LCTL,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                         KC_H,    KC_J,    KC_K,    KC_L, KC_SCLN, KC_QUOT,
++  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
++      KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,  KC_ESC,
++  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
++                            BW_DELETE_CMD, BW_BSPC_L1, BW_ENTER_CTL,    XXXXXXX, BW_TAB_L2, BW_ESC_ALT
++                                      //`--------------------------'  `--------------------------'
++
++  ),
++
++    [1] = LAYOUT_split_3x6_3(
++  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
++       KC_TAB,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0, KC_BSPC,
++  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
++      KC_LCTL, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, KC_LEFT,   KC_UP, KC_DOWN,KC_RIGHT, XXXXXXX,
++  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
++      KC_LSFT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
++  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
++                                          KC_LGUI, _______,  KC_SPC,     XXXXXXX,   MO(3), KC_RALT
++                                      //`--------------------------'  `--------------------------'
++  ),
++
++    [2] = LAYOUT_split_3x6_3(
++  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
++       KC_TAB, KC_EXLM,   KC_AT, KC_HASH,  KC_DLR, KC_PERC,                      KC_CIRC, KC_AMPR, KC_ASTR, KC_LPRN, KC_RPRN, KC_BSPC,
++  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
++      KC_LCTL, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_MINS,  KC_EQL, KC_LBRC, KC_RBRC, KC_BSLS,  KC_GRV,
++  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
++      KC_LSFT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_UNDS, KC_PLUS, KC_LCBR, KC_RCBR, KC_PIPE, KC_TILD,
++  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
++                                          KC_LGUI,   MO(3),  KC_SPC,     XXXXXXX, _______, KC_RALT
++                                      //`--------------------------'  `--------------------------'
++  ),
++
++    [3] = LAYOUT_split_3x6_3(
++  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
++        QK_BOOT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
++  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
++      RGB_TOG, RGB_HUI, RGB_SAI, RGB_VAI, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
++  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
++      RGB_MOD, RGB_HUD, RGB_SAD, RGB_VAD, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
++  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
++                                          KC_LGUI, _______,  KC_SPC,     XXXXXXX, _______, KC_RALT
++                                      //`--------------------------'  `--------------------------'
++  )
++};
+Index: keyboards/crkbd/keymaps/ivangodzynskyi/rules.mk
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/keyboards/crkbd/keymaps/ivangodzynskyi/rules.mk b/keyboards/crkbd/keymaps/ivangodzynskyi/rules.mk
+new file mode 100644
+--- /dev/null	(revision 69df42d9994b72522347f7cac13a0d55b752e246)
++++ b/keyboards/crkbd/keymaps/ivangodzynskyi/rules.mk	(revision 69df42d9994b72522347f7cac13a0d55b752e246)
+@@ -0,0 +1,17 @@
++MOUSEKEY_ENABLE     = yes      # Mouse keys
++RGBLIGHT_ENABLE     = no     # Enable WS2812 RGB underlight.
++VIA_ENABLE          = no     # Enable VIA
++VIAL_ENABLE         = no     # Enable VIAL
++OLED_ENABLE         = no
++EXTRAKEY_ENABLE     = yes
++LTO_ENABLE          = yes
++QMK_SETTINGS        = no
++COMBO_ENABLE        = no
++TAP_DANCE_ENABLE    = no
++KEY_OVERRIDE_ENABLE = no
++VIAL_INSECURE       = yes
++CAPS_WORD_ENABLE    = yes
++
++POINTING_DEVICE_ENABLE = no
++POINTING_DEVICE_DRIVER = pimoroni_trackball
++
+Index: keyboards/crkbd/rev1/rules.mk
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/keyboards/crkbd/rev1/rules.mk b/keyboards/crkbd/rev1/rules.mk
+new file mode 100644
+--- /dev/null	(revision 69df42d9994b72522347f7cac13a0d55b752e246)
++++ b/keyboards/crkbd/rev1/rules.mk	(revision 69df42d9994b72522347f7cac13a0d55b752e246)
+@@ -0,0 +1,1 @@
++DEFAULT_FOLDER = crkbd/rev1
+Index: keyboards/keyball/keyball44/keymaps/default/config.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/keyboards/keyball/keyball44/keymaps/default/config.h b/keyboards/keyball/keyball44/keymaps/default/config.h
+--- a/keyboards/keyball/keyball44/keymaps/default/config.h	(revision 34e9660fea1eb19e721f97e7fc804c3bee2716bb)
++++ b/keyboards/keyball/keyball44/keymaps/default/config.h	(revision 69df42d9994b72522347f7cac13a0d55b752e246)
+@@ -37,3 +37,6 @@
+ 
+ #define POINTING_DEVICE_AUTO_MOUSE_ENABLE
+ #define AUTO_MOUSE_DEFAULT_LAYER 1
++
++#define TAPPING_TERM 200
++#define PERMISSIVE_HOLD
+Index: keyboards/keyball/keyball44/keymaps/default/keymap.c
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/keyboards/keyball/keyball44/keymaps/default/keymap.c b/keyboards/keyball/keyball44/keymaps/default/keymap.c
+--- a/keyboards/keyball/keyball44/keymaps/default/keymap.c	(revision 34e9660fea1eb19e721f97e7fc804c3bee2716bb)
++++ b/keyboards/keyball/keyball44/keymaps/default/keymap.c	(revision 0f94a544c34825b416664af653fed6e340858c35)
+@@ -16,47 +16,199 @@
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
+-#include QMK_KEYBOARD_H
+-
+ #include "quantum.h"
++#include "action.h"
++#include "math.h"
++#include QMK_KEYBOARD_H
++
++
++enum combos {
++  MOUSE_COMBO
++};
++
++const uint16_t PROGMEM mouse_combo[] = {KC_U, KC_I, COMBO_END};
++
++combo_t key_combos[] = {
++  [MOUSE_COMBO] = COMBO(mouse_combo, KC_BTN1)
++};
+ 
+ // clang-format off
+ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+   // keymap for default
+   [0] = LAYOUT_universal(
+-    KC_ESC   , KC_Q     , KC_W     , KC_E     , KC_R     , KC_T     ,                                        KC_Y     , KC_U     , KC_I     , KC_O     , KC_P     , KC_DEL   ,
+-    KC_TAB   , KC_A     , KC_S     , KC_D     , KC_F     , KC_G     ,                                        KC_H     , KC_J     , KC_K     , KC_L     , KC_SCLN  , S(KC_7)  ,
+-    KC_LSFT  , KC_Z     , KC_X     , KC_C     , KC_V     , KC_B     ,                                        KC_N     , KC_M     , KC_COMM  , KC_DOT   , KC_SLSH  , KC_INT1  ,
+-              KC_LALT,KC_LGUI,LCTL_T(KC_LNG2)     ,LT(1,KC_SPC),LT(3,KC_LNG1),                  KC_BSPC,LT(2,KC_ENT), RCTL_T(KC_LNG2),     KC_RALT  , KC_PSCR
++      //,------------------------------------------------------------------------------.          ,----------------------------------------------------------------------------.
++           KC_GRV,         KC_Q,         KC_W,         KC_E,         KC_R,         KC_T,               KC_Y,          KC_U,         KC_I,         KC_O,            KC_P, KC_LBRC,
++      //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
++           KC_TAB, LSFT_T(KC_A), LCTL_T(KC_S), LALT_T(KC_D), LGUI_T(KC_F),         KC_G,               KC_H,  LGUI_T(KC_J), LALT_T(KC_K), LCTL_T(KC_L), LSFT_T(KC_SCLN), KC_QUOT,
++      //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
++            MO(4),         KC_Z,         KC_X,   LT(1,KC_C),   LT(2,KC_V),         KC_B,               KC_N,    LT(2,KC_M),LT(3,KC_COMM),       KC_DOT,         KC_SLSH, KC_BTN2,
++      //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
++                        KC_LALT,LT(2, KC_ENT),      KC_BTN1,LT(1,KC_BSPC),LT(2, KC_ESC),       LT(2,KC_ENT),  LT(1,KC_SPC),      XXXXXXX,      XXXXXXX,   KC_BTN3
+   ),
+ 
+   [1] = LAYOUT_universal(
+-    SSNP_FRE ,  KC_F1   , KC_F2    , KC_F3   , KC_F4    , KC_F5    ,                                         KC_F6    , KC_F7    , KC_F8    , KC_F9    , KC_F10   , KC_F11   ,
+-    SSNP_VRT ,  _______ , _______  , KC_UP   , KC_ENT   , KC_DEL   ,                                         KC_PGUP  , KC_BTN1  , KC_UP    , KC_BTN2  , KC_BTN3  , KC_F12   ,
+-    SSNP_HOR ,  _______ , KC_LEFT  , KC_DOWN , KC_RGHT  , KC_BSPC  ,                                         KC_PGDN  , KC_LEFT  , KC_DOWN  , KC_RGHT  , _______  , _______  ,
+-                  _______  , _______ , _______  ,         _______  , _______  ,                   _______  , _______  , _______       , _______  , _______
++    //,-----------------------------------------------------.                    ,-----------------------------------------------------.
++          XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0, KC_RBRC,
++      //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
++          XXXXXXX, _______, _______, _______, _______, XXXXXXX,                       KC_EQL,    KC_4,    KC_5,    KC_6, XXXXXXX, KC_BSLS,
++      //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
++          XXXXXXX, XXXXXXX, XXXXXXX, _______, XXXXXXX, XXXXXXX,                      KC_MINS,    KC_1,    KC_2,    KC_3, XXXXXXX, XXXXXXX,
++      //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
++                            _______, _______, _______, _______, _______,    KC_PDOT,    KC_0, _______, _______, _______
++  ),
++
++  [2] = LAYOUT_universal(
++    //,-----------------------------------------------------.                    ,-----------------------------------------------------.
++          XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                       KC_F12,   KC_F7,   KC_F8,   KC_F9, KC_LCBR, KC_RCBR,
++      //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
++          XXXXXXX, _______, _______, _______, _______, XXXXXXX,                      KC_F11,  KC_F4, KC_F5, KC_F6, KC_BSLS,  KC_GRV,
++      //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
++          XXXXXXX, XXXXXXX, XXXXXXX, _______, _______, XXXXXXX,                      KC_F10, KC_F1, KC_F2, KC_F3, KC_PIPE, KC_TILD,
++      //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
++                            _______, _______, _______, _______, _______,    _______, _______, _______, _______, _______
+   ),
+ 
+-  [2] = LAYOUT_universal(
+-    _______  ,S(KC_QUOT), KC_7     , KC_8    , KC_9     , S(KC_8)  ,                                         S(KC_9)  , S(KC_1)  , S(KC_6)  , KC_LBRC  , S(KC_4)  , _______  ,
+-    _______  ,S(KC_SCLN), KC_4     , KC_5    , KC_6     , KC_RBRC  ,                                         KC_NUHS  , KC_MINS  , S(KC_EQL), S(KC_3)  , KC_QUOT  , S(KC_2)  ,
+-    _______  ,S(KC_MINS), KC_1     , KC_2    , KC_3     ,S(KC_RBRC),                                        S(KC_NUHS),S(KC_INT1), KC_EQL   ,S(KC_LBRC),S(KC_SLSH),S(KC_INT3),
+-                  KC_0     , KC_DOT  , _______  ,         _______  , _______  ,                   KC_DEL   , _______  , _______       , _______  , _______
+-  ),
+-
+   [3] = LAYOUT_universal(
++    //,-----------------------------------------------------.                    ,-----------------------------------------------------.
++          _______, _______, _______, _______, _______, _______,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
++      //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
++          _______, _______, _______, _______, _______, _______,                      XXXXXXX, KC_LEFT, XXXXXXX,   KC_UP,KC_RIGHT, XXXXXXX,
++      //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
++          _______, _______, _______, _______, _______, _______,                      XXXXXXX, XXXXXXX, _______, KC_DOWN, XXXXXXX, XXXXXXX,
++      //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
++                            _______, _______, _______, _______, _______,    _______, _______, _______, _______, _______
++  ),
++
++  [4] = LAYOUT_universal(
+     RGB_TOG  , AML_TO   , AML_I50  , AML_D50  , _______  , _______  ,                                        RGB_M_P  , RGB_M_B  , RGB_M_R  , RGB_M_SW , RGB_M_SN , RGB_M_K  ,
+     RGB_MOD  , RGB_HUI  , RGB_SAI  , RGB_VAI  , _______  , SCRL_DVI ,                                        RGB_M_X  , RGB_M_G  , RGB_M_T  , RGB_M_TW , _______  , _______  ,
+     RGB_RMOD , RGB_HUD  , RGB_SAD  , RGB_VAD  , _______  , SCRL_DVD ,                                        CPI_D1K  , CPI_D100 , CPI_I100 , CPI_I1K  , _______  , KBC_SAVE ,
+-                  QK_BOOT  , KBC_RST  , _______  ,        _______  , _______  ,                   _______  , _______  , _______       , KBC_RST  , QK_BOOT
++                          QK_BOOT  , KBC_RST  , _______  ,  _______, _______,                     _______  , _______  ,  _______ , KBC_RST  , QK_BOOT
+   ),
+ };
+-// clang-format on
++
++#define SCROLL_STEP_H 10
++#define SCROLL_STEP_V 15
++#define SCROLL_VALUE 1
++float scroll_accumulated_h = 0;
++float scroll_accumulated_v = 0;
++
++
++// Arrow keys slight slowing
++#define ARROW_STEP_X 20
++#define ARROW_STEP_Y 20
++int accumulated_arrow_x = 0;
++int accumulated_arrow_y = 0;
++
++// Arrow keys slight slowing
++#define VOLUME_STEP_Y 40
++#define BRIGHT_STEP_X 40
++int accumulated_volume_y = 0;
++int accumulated_bright_x = 0;
++
++
++// add non-linear scaling to all mouse movements
++report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
++
++    // arrow key emulation
++    if (layer_state_is(3)) {
++        accumulated_arrow_x += mouse_report.x;
++        accumulated_arrow_y += mouse_report.y;
++
++        if (accumulated_arrow_x < -ARROW_STEP_X) {
++            tap_code(KC_LEFT);
++            accumulated_arrow_x = 0;
++            accumulated_arrow_y = 0;
++        }
++        if (accumulated_arrow_x > ARROW_STEP_X) {
++            tap_code(KC_RIGHT);
++            accumulated_arrow_x = 0;
++            accumulated_arrow_y = 0;
++        }
++        if (accumulated_arrow_y > ARROW_STEP_Y) {
++            tap_code(KC_DOWN);
++            accumulated_arrow_x = 0;
++            accumulated_arrow_y = 0;
++        }
++        if (accumulated_arrow_y < -ARROW_STEP_Y) {
++            tap_code(KC_UP);
++            accumulated_arrow_x = 0;
++            accumulated_arrow_y = 0;
++        }
++
++        // return a null report
++        mouse_report.x = 0;
++        mouse_report.y = 0;
++        return mouse_report;
++    }
++
++    // volume and brightness
++    if (layer_state_is(4)) {
++        accumulated_bright_x += mouse_report.x;
++        accumulated_volume_y += mouse_report.y;
++
++        if (accumulated_bright_x < -BRIGHT_STEP_X) {
++            tap_code(KC_BRID);
++            accumulated_bright_x = 0;
++            accumulated_volume_y = 0;
++        }
++        if (accumulated_bright_x > BRIGHT_STEP_X) {
++            tap_code(KC_BRIU);
++            accumulated_bright_x = 0;
++            accumulated_volume_y = 0;
++        }
++        if (accumulated_volume_y > VOLUME_STEP_Y) {
++            tap_code(KC_VOLD);
++            accumulated_bright_x = 0;
++            accumulated_volume_y = 0;
++        }
++        if (accumulated_volume_y < -VOLUME_STEP_Y) {
++            tap_code(KC_VOLU);
++            accumulated_bright_x = 0;
++            accumulated_volume_y = 0;
++        }
++
++        // return a null report
++        mouse_report.x = 0;
++        mouse_report.y = 0;
++        return mouse_report;
++    }
++
++    if (layer_state_is(2)) {
++        // Calculate and accumulate scroll values based on mouse movement and divisors
++         scroll_accumulated_h += (float)mouse_report.x;
++         scroll_accumulated_v += (float)mouse_report.y;
++
++
++        if (fabs(scroll_accumulated_v) >= SCROLL_STEP_V) {
++            if (scroll_accumulated_v > 0) {
++             mouse_report.v = (float)SCROLL_VALUE;
++            } else {
++             mouse_report.v = -(float)SCROLL_VALUE;
++            }
++            scroll_accumulated_v = 0;
++            scroll_accumulated_h = 0;
++        }
++        if (fabs(scroll_accumulated_h) >= SCROLL_STEP_H) {
++            if (scroll_accumulated_h > 0) {
++                mouse_report.h = -(float)SCROLL_VALUE;
++            } else {
++                mouse_report.h = (float)SCROLL_VALUE;
++            }
++            scroll_accumulated_h = 0;
++            scroll_accumulated_v = 0;
+ 
+-layer_state_t layer_state_set_user(layer_state_t state) {
+-    // Auto enable scroll mode when the highest layer is 3
+-    keyball_set_scroll_mode(get_highest_layer(state) == 3);
+-    return state;
++        }
++
++        // Clear the X and Y values of the mouse report
++        mouse_report.x = 0;
++        mouse_report.y = 0;
++    }
++    if (get_mods() & MOD_MASK_SHIFT) {
++        mouse_report.x *= 3;
++        mouse_report.y *= 3;
++    }
++    return mouse_report;
+ }
+ 
+ #ifdef OLED_ENABLE
+Index: keyboards/keyball/keyball44/keymaps/default/rules.mk
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/keyboards/keyball/keyball44/keymaps/default/rules.mk b/keyboards/keyball/keyball44/keymaps/default/rules.mk
+--- a/keyboards/keyball/keyball44/keymaps/default/rules.mk	(revision 34e9660fea1eb19e721f97e7fc804c3bee2716bb)
++++ b/keyboards/keyball/keyball44/keymaps/default/rules.mk	(revision 69df42d9994b72522347f7cac13a0d55b752e246)
+@@ -1,3 +1,4 @@
+ RGBLIGHT_ENABLE = yes
++COMBO_ENABLE        = yes
+ 
+ OLED_ENABLE = yes
+Index: users/ivangodzynskyi/config.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/users/ivangodzynskyi/config.h b/users/ivangodzynskyi/config.h
+new file mode 100644
+--- /dev/null	(revision 69df42d9994b72522347f7cac13a0d55b752e246)
++++ b/users/ivangodzynskyi/config.h	(revision 69df42d9994b72522347f7cac13a0d55b752e246)
+@@ -0,0 +1,31 @@
++/*
++This is the c configuration file for the keymap
++
++Copyright 2012 Jun Wako <wakojun@gmail.com>
++Copyright 2015 Jack Humbert
++
++This program is free software: you can redistribute it and/or modify
++it under the terms of the GNU General Public License as published by
++the Free Software Foundation, either version 2 of the License, or
++(at your option) any later version.
++
++This program is distributed in the hope that it will be useful,
++but WITHOUT ANY WARRANTY; without even the implied warranty of
++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++GNU General Public License for more details.
++
++You should have received a copy of the GNU General Public License
++along with this program.  If not, see <http://www.gnu.org/licenses/>.
++*/
++
++#pragma once
++
++#define MASTER_RIGHT
++
++#define PERMISSIVE_HOLD
++
++#define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
++
++#define POINTING_DEVICE_ROTATION_90
++#define MOUSE_EXTENDED_REPORT
++#define PIMORONI_TRACKBALL_SCALE    
+Index: users/ivangodzynskyi/keymap.c
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/users/ivangodzynskyi/keymap.c b/users/ivangodzynskyi/keymap.c
+new file mode 100644
+--- /dev/null	(revision 69df42d9994b72522347f7cac13a0d55b752e246)
++++ b/users/ivangodzynskyi/keymap.c	(revision 69df42d9994b72522347f7cac13a0d55b752e246)
+@@ -0,0 +1,339 @@
++/*
++Copyright 2019 @foostan
++Copyright 2020 Drashna Jaelre <@drashna>
++
++This program is free software: you can redistribute it and/or modify
++it under the terms of the GNU General Public License as published by
++the Free Software Foundation, either version 2 of the License, or
++(at your option) any later version.
++
++This program is distributed in the hope that it will be useful,
++but WITHOUT ANY WARRANTY; without even the implied warranty of
++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++GNU General Public License for more details.
++
++You should have received a copy of the GNU General Public License
++along with this program.  If not, see <http://www.gnu.org/licenses/>.
++*/
++
++#include "action.h"
++#include QMK_KEYBOARD_H
++
++#define BW_TAP_TIME 200  //configure max tap time, 200ms here
++
++enum custom_keycodes {
++  BW_BSPC_L1 = SAFE_RANGE,
++  BW_TAB_L2,
++  BW_BSPC_L3,
++  BW_TAB_L3,
++  BW_DELETE_CMD,
++  BW_ENTER_CTL,
++  BW_ESC_ALT
++};
++
++bool process_record_user(uint16_t keycode, keyrecord_t *record) {
++  static uint16_t bspc_l1_timer;
++  static uint16_t tab_l2_timer;
++  static uint16_t bspc_l3_timer;
++  static uint16_t tab_l3_timer;
++  static uint16_t delete_cmd_timer;
++  static uint16_t enter_ctl_timer;
++  static uint16_t esc_alt_timer;
++  switch (keycode) {
++    // combined backspace and layer 1 key
++    case BW_BSPC_L1:
++      if (record->event.pressed) {
++        bspc_l1_timer = timer_read();
++        layer_on(1); 
++      } else {
++        layer_off(1); 
++        if (timer_elapsed(bspc_l1_timer) < BW_TAP_TIME)
++          tap_code(KC_BSPC);
++      }
++      return false;
++    // combined tab and layer 2 key
++    case BW_TAB_L2:
++      if (record->event.pressed) {
++        tab_l2_timer = timer_read();
++        layer_on(2); 
++      } else {
++        layer_off(2);
++        if (timer_elapsed(tab_l2_timer) < BW_TAP_TIME)
++          tap_code(KC_TAB);
++      }
++      return false;
++      // combined backspace and layer 3 key
++    case BW_BSPC_L3:
++      if (record->event.pressed) {
++        bspc_l3_timer = timer_read();
++        layer_on(3); 
++      } else {
++        layer_off(3); 
++        if (timer_elapsed(bspc_l3_timer) < BW_TAP_TIME)
++          tap_code(KC_BSPC);
++      }
++      return false;
++    // combined tab and layer 3 key
++    case BW_TAB_L3:
++      if (record->event.pressed) {
++        tab_l3_timer = timer_read();
++        layer_on(3); 
++      } else {
++        layer_off(3);
++        if (timer_elapsed(tab_l3_timer) < BW_TAP_TIME)
++          tap_code(KC_TAB);
++      }
++      return false;
++    // combined delete and command key
++    case BW_DELETE_CMD:
++      if (record->event.pressed) {
++        delete_cmd_timer = timer_read();
++        register_code(KC_LGUI); 
++      } else {
++        unregister_code(KC_LGUI); 
++        if (timer_elapsed(delete_cmd_timer) < BW_TAP_TIME)
++          tap_code(KC_DEL);
++      }
++      return false;
++    // combined enter and control key
++    case BW_ENTER_CTL:
++      if (record->event.pressed) {
++        enter_ctl_timer = timer_read();
++        register_code(KC_LCTL); 
++      } else {
++        unregister_code(KC_LCTL); 
++        if (timer_elapsed(enter_ctl_timer) < BW_TAP_TIME)
++          tap_code(KC_ENT);
++      }
++      return false;
++    // combined escape and alt key
++    case BW_ESC_ALT:
++      if (record->event.pressed) {
++        esc_alt_timer = timer_read();
++        register_code(KC_RALT); 
++      } else {
++        unregister_code(KC_RALT); 
++        if (timer_elapsed(esc_alt_timer) < BW_TAP_TIME)
++          tap_code(KC_ESC);
++      }
++      return false; 
++  }
++  return true;
++}
++
++const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
++	[0] = LAYOUT_split_3x6_3(
++        KC_GRV,  KC_Q, KC_W, KC_E, KC_R, KC_T, KC_Y, KC_U, KC_I, KC_O, KC_P, KC_BSLS, 
++        CW_TOGG, KC_A, KC_S, KC_D, KC_F, KC_G, KC_H, KC_J, KC_K, KC_L, KC_SCLN, KC_QUOT, 
++        KC_LSFT, KC_Z, KC_X, KC_C, KC_V, KC_B, KC_N, KC_M, KC_COMM, KC_DOT, KC_SLSH, KC_RSFT, 
++        BW_DELETE_CMD, BW_BSPC_L1, BW_ENTER_CTL, KC_SPC, BW_TAB_L2, BW_ESC_ALT
++        ),
++	[1] = LAYOUT_split_3x6_3(
++        KC_NO, KC_EXLM, KC_AT, KC_LBRC, KC_RBRC, KC_AMPR, KC_PSLS, KC_P7, KC_P8, KC_P9, KC_PMNS, KC_NO, 
++        KC_NO, KC_HASH, KC_DLR, KC_LPRN, KC_RPRN, KC_PEQL, KC_ASTR, KC_P4, KC_P5, KC_P6, KC_PLUS, KC_NO, 
++        KC_LSFT, KC_PERC, KC_CIRC, KC_LCBR, KC_RCBR, KC_UNDS, KC_P0, KC_P1, KC_P2, KC_P3, KC_PDOT, KC_RSFT, 
++        BW_DELETE_CMD, KC_TRNS, BW_ENTER_CTL, KC_SPC, BW_TAB_L3, BW_ESC_ALT
++        ),
++	[2] = LAYOUT_split_3x6_3(
++        KC_NO, KC_PGUP, KC_HOME, KC_UP, KC_END, KC_NO, LCA(KC_D), LCA(KC_LEFT), LCA(KC_ENT), LCA(KC_T), LCA(KC_RGHT), KC_NO, 
++        KC_NO, KC_PGDN, KC_LEFT, KC_DOWN, KC_RGHT,  KC_NO, KC_BTN1, KC_BTN2, KC_BTN3, RCS(KC_TAB), RCTL(KC_TAB), RGUI(KC_BSLS), 
++        KC_LSFT, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, LCAG(KC_SPC), LALT(KC_GRV), LGUI(KC_GRV), SGUI(KC_4), LCAG(KC_SLSH), KC_RSFT, 
++        BW_DELETE_CMD, BW_BSPC_L3, BW_ENTER_CTL, KC_SPC, KC_TRNS, BW_ESC_ALT
++        ),
++	[3] = LAYOUT_split_3x6_3(
++        KC_NO, KC_NO, KC_BRIU, KC_VOLU, KC_MFFD, KC_NO, KC_NO, KC_F7, KC_F8, KC_F9, KC_F12, KC_NO, 
++        KC_NO, KC_NO, KC_BRID, KC_VOLD, KC_MPLY, KC_NO, KC_NO, KC_F4, KC_F5, KC_F6, KC_F11, KC_NO, 
++        KC_NO, KC_NO, KC_NO, KC_MUTE, KC_MRWD, KC_NO, KC_NO, KC_F1, KC_F2, KC_F3, KC_F10, KC_NO, 
++        BW_DELETE_CMD, KC_TRNS, BW_ENTER_CTL, KC_SPC, KC_TRNS, BW_ESC_ALT
++        )};
++
++// Modify these alues to adjust the scrolling speed
++#define SCROLL_DIVISOR_H 8.0
++#define SCROLL_DIVISOR_V 8.0
++
++// Variables to store accumulated scroll values
++float scroll_accumulated_h = 0;
++float scroll_accumulated_v = 0;
++
++// Modify these to adjust non-linear mouse scaling
++#define MAX_SCALE 32
++#define MIN_SCALE 1
++#define GROWTH_FACTOR 64
++#define MOMENTUM 0.01
++
++// Variable to store an exponential moving average scaling factor to denoise the non-linear scaling
++float accumulated_factor = MIN_SCALE;
++
++// Arrow keys slight slowing
++#define ARROW_STEP 2
++int accumulated_arrow_x = 0;
++int accumulated_arrow_y = 0;
++
++float average_arrow_x = 0;
++float average_arrow_y = 0;
++
++#define ARROW_MOMENTUM 0.99
++
++// Alt-Tab parameteres
++#define ALT_TAB_STEP 4
++int accumulated_alt_tab = 0;
++int pressed_command = 0;
++
++// add non-linear scaling to all mouse movements
++report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
++    // alt-tab operation
++    if (layer_state_is(3)) {
++        // send alt-tab when on this layer. On first mouse movement, press
++        // command.  Accumulate and sent tab or shift tab.  Release command
++        // when you leave this layer.
++
++        if ((mouse_report.x != 0) && (pressed_command == 0)) {
++          pressed_command = 1;
++          register_code(KC_LGUI);
++        }
++        accumulated_alt_tab += mouse_report.x;
++    
++        // process queued clicks
++        if (accumulated_alt_tab <= -ALT_TAB_STEP){
++            tap_code16(LSFT(KC_TAB));
++            accumulated_alt_tab += ALT_TAB_STEP;
++        }
++        if (accumulated_alt_tab >= ALT_TAB_STEP) {
++            tap_code(KC_TAB);
++            accumulated_alt_tab -= ALT_TAB_STEP;
++        }
++        
++        // return a null report
++        mouse_report.x = 0;
++        mouse_report.y = 0;
++        return mouse_report;
++    }
++    if (pressed_command == 1) {
++      // if you are not on layer 3, and command is pressed, release it.
++      pressed_command = 0;
++      unregister_code(KC_LGUI);
++    }
++
++    // arrow key emulation
++    if (layer_state_is(1)) {
++        // move one space per click here, biasing towards vertical
++        // if you are moving in text horizontally and click an accidental
++        // vertical, you can just click back.  If you are moving vertically
++        // and send an accidental horizontal, you can't just click back
++        // if you are in a line shorter than where you started.  Thus,
++        // you should strongly prefer vertical movement to bias against
++        // accidental sideways clicks.  Almost all text scrolling is
++        // orthogonal, so this helps suppress diagonal motion.  Think of it
++        // as if you are in a box, and you move when you hit an edge, 
++        // resetting to the center each time.  
++
++        // This version additionally keeps a running average and only allows
++        // motion in the direction of the recent average 
++
++        // update the accumulated arrow momentum
++        average_arrow_x = average_arrow_x*ARROW_MOMENTUM + (float) mouse_report.x*(1-ARROW_MOMENTUM);
++        average_arrow_y = average_arrow_y*ARROW_MOMENTUM + (float) mouse_report.y*(1-ARROW_MOMENTUM);
++
++        // kill accumulated clicks orthogonal to average direction           
++        if (fabs(average_arrow_x) > fabs(average_arrow_y)){
++            accumulated_arrow_x += mouse_report.x;
++            accumulated_arrow_y = 0;
++        }
++        if (fabs(average_arrow_y) > fabs(average_arrow_x)){
++            accumulated_arrow_x = 0;
++            accumulated_arrow_y += mouse_report.y;
++        }
++    
++        // process queued clicks
++        if (accumulated_arrow_x <= -ARROW_STEP){
++            tap_code(KC_LEFT);
++            accumulated_arrow_x += ARROW_STEP;
++        }
++        if (accumulated_arrow_x >= ARROW_STEP) {
++            tap_code(KC_RIGHT);
++            accumulated_arrow_x -= ARROW_STEP;
++        }
++        if (accumulated_arrow_y <= -ARROW_STEP){
++            tap_code(KC_UP);
++            accumulated_arrow_y += ARROW_STEP;
++        }
++        if (accumulated_arrow_y >= ARROW_STEP) {
++            tap_code(KC_DOWN);
++            accumulated_arrow_y -= ARROW_STEP;
++        }
++        
++        // return a null report
++        mouse_report.x = 0;
++        mouse_report.y = 0;
++        return mouse_report;
++    }
++
++    // compute the size of the last mouse movement
++    float mouse_length = sqrt(mouse_report.x*mouse_report.x + mouse_report.y*mouse_report.y);
++
++    // compute an instantaneous scaling factor and update exponential moving average
++    float factor =  GROWTH_FACTOR*mouse_length+ MIN_SCALE;
++    accumulated_factor = accumulated_factor*(1-MOMENTUM) + factor*MOMENTUM;
++
++    if (accumulated_factor > MAX_SCALE) {
++        // clamp the scaling factor to avoid overflowing mouse_report
++        mouse_report.x *= MAX_SCALE;
++        mouse_report.y *= MAX_SCALE;
++    }
++    else {
++        // scale up the mouse movement by the average factor
++        mouse_report.x = (int16_t)(mouse_report.x * accumulated_factor);
++        mouse_report.y = (int16_t)(mouse_report.y * accumulated_factor);
++    }
++
++    // switch to scrolling on every layer but 2 (where my mousekeys live)
++    if (!layer_state_is(2)) {
++        // Calculate and accumulate scroll values based on mouse movement and divisors
++        scroll_accumulated_h += (float)mouse_report.x / SCROLL_DIVISOR_H;
++        scroll_accumulated_v += (float)mouse_report.y / SCROLL_DIVISOR_V;
++
++        // Assign integer parts of accumulated scroll values to the mouse report
++        mouse_report.h = -(int16_t)scroll_accumulated_h;
++        mouse_report.v = (int16_t)scroll_accumulated_v;
++
++        // Update accumulated scroll values by subtracting the integer parts
++        scroll_accumulated_h -= (int16_t)scroll_accumulated_h;
++        scroll_accumulated_v -= (int16_t)scroll_accumulated_v;
++
++        // Clear the X and Y values of the mouse report
++        mouse_report.x = 0;
++        mouse_report.y = 0;
++    }
++    return mouse_report;
++}
++
++layer_state_t layer_state_set_user(layer_state_t state) {
++    switch (get_highest_layer(state)) {
++    case 0:
++        pimoroni_trackball_set_rgbw(0,0,0,255);
++        break;
++    case 1:
++        pimoroni_trackball_set_rgbw(192,0,64,0);
++        break;
++    case 2:
++        pimoroni_trackball_set_rgbw(0,192,128,0);
++        break;
++    case 3:
++        pimoroni_trackball_set_rgbw(153,113,0,0);
++        break;
++    }
++  return state;
++}
++
++void keyboard_post_init_user(void) {
++    // default trackball to white
++	pimoroni_trackball_set_rgbw(0,0,0,255);
++}
++
++void suspend_power_down_user(void) {
++	pimoroni_trackball_set_rgbw(0,0,0,0);
++}
++
++void suspend_wakeup_init_user(void) {
++    pimoroni_trackball_set_rgbw(0,0,0,255);
++}
+Index: users/ivangodzynskyi/rules.mk
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/users/ivangodzynskyi/rules.mk b/users/ivangodzynskyi/rules.mk
+new file mode 100644
+--- /dev/null	(revision 69df42d9994b72522347f7cac13a0d55b752e246)
++++ b/users/ivangodzynskyi/rules.mk	(revision 69df42d9994b72522347f7cac13a0d55b752e246)
+@@ -0,0 +1,16 @@
++MOUSEKEY_ENABLE     = yes      # Mouse keys
++RGBLIGHT_ENABLE     = no     # Enable WS2812 RGB underlight.
++VIA_ENABLE          = no     # Enable VIA
++VIAL_ENABLE         = no     # Enable VIAL
++OLED_ENABLE         = no
++EXTRAKEY_ENABLE     = yes
++LTO_ENABLE          = yes
++QMK_SETTINGS        = no
++COMBO_ENABLE        = no
++TAP_DANCE_ENABLE    = no
++KEY_OVERRIDE_ENABLE = no
++VIAL_INSECURE       = yes
++CAPS_WORD_ENABLE    = yes
++
++POINTING_DEVICE_ENABLE = yes
++POINTING_DEVICE_DRIVER = pimoroni_trackball
+Index: users/idank/config.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/users/idank/config.h b/users/idank/config.h
+--- a/users/idank/config.h	(revision d685a2c1f358effc8a26d6845f9b230e978da1d9)
++++ b/users/idank/config.h	(revision 6e3093906dba3e2c5c029f058d0390d9a5f42f6c)
+@@ -88,8 +88,8 @@
+     #endif
+ 
+     // Tap for left click.
+-    #define CIRQUE_PINNACLE_TAP_ENABLE
+-    #define POINTING_DEVICE_GESTURES_SCROLL_ENABLE
++//    #define CIRQUE_PINNACLE_TAP_ENABLE
++//    #define POINTING_DEVICE_GESTURES_SCROLL_ENABLE
+ #endif
+ 
+ #ifdef POINTING_DEVICE_DRIVER_ps2

@@ -23,13 +23,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 enum combos {
-  MOUSE_COMBO
+  MOUSE_COMBO,
+  MOUSE_COMBO3,
+  ENTER_COMBO
 };
 
 const uint16_t PROGMEM mouse_combo[] = {KC_U, KC_I, COMBO_END};
+const uint16_t PROGMEM mouse_combo3[] = {KC_O, KC_P, COMBO_END};
+const uint16_t PROGMEM enter_combo[] = {KC_O, KC_I, COMBO_END};
 
 combo_t key_combos[] = {
-  [MOUSE_COMBO] = COMBO(mouse_combo, KC_BTN1)
+  [MOUSE_COMBO] = COMBO(mouse_combo, KC_BTN1),
+  [MOUSE_COMBO3] = COMBO(mouse_combo3, KC_BTN3),
+  [ENTER_COMBO] = COMBO(enter_combo, KC_ENT)
 };
 
 // clang-format off

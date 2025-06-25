@@ -17,23 +17,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "action.h"
 #include "math.h"
+//#include "print.h"
 #include QMK_KEYBOARD_H
 
 
 enum combos {
   MOUSE_COMBO,
   MOUSE_COMBO3,
-  ENTER_COMBO
+  ENTER_COMBO,
+  SCRDN_COMBO,
+  SCRUP_COMBO
 };
 
 const uint16_t PROGMEM mouse_combo[] = {KC_U, KC_I, COMBO_END};
 const uint16_t PROGMEM mouse_combo3[] = {KC_O, KC_P, COMBO_END};
 const uint16_t PROGMEM enter_combo[] = {KC_O, KC_I, COMBO_END};
+const uint16_t PROGMEM scrdn_combo[] = {KC_W, KC_E, COMBO_END};
+const uint16_t PROGMEM scrup_combo[] = {KC_E, KC_R, COMBO_END};
 
 combo_t key_combos[] = {
   [MOUSE_COMBO] = COMBO(mouse_combo, KC_BTN1),
   [MOUSE_COMBO3] = COMBO(mouse_combo3, KC_BTN3),
-  [ENTER_COMBO] = COMBO(enter_combo, KC_ENT)
+  [ENTER_COMBO] = COMBO(enter_combo, KC_ENT),
+  [SCRDN_COMBO] = COMBO(scrdn_combo, KC_WH_D),
+  [SCRUP_COMBO] = COMBO(scrup_combo, KC_WH_U)
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -45,7 +52,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
      LT(4,KC_ENT),         KC_Z,         KC_X,         KC_C,   LT(2,KC_V),         KC_B,               KC_N,    LT(2,KC_M),LT(3,KC_COMM),       KC_DOT,         KC_SLSH, KC_BTN2,
       //|--------+-------------+-------------+-------------+-------------+-------------|          |--------+--------------+-------------+-------------+----------------+--------|
-                                                    KC_BTN1,LT(1,KC_BSPC),LT(2, KC_ESC),            XXXXXXX,  LT(1,KC_SPC), XXXXXXX
+                                                    KC_BTN1,LT(1,KC_BSPC),LT(2, KC_ESC),            XXXXXXX,  LT(1,KC_SPC), KC_BTN3
   ),
 
     [1] = LAYOUT_split_3x6_3(
@@ -119,14 +126,21 @@ int accumulated_bright_x = 0;
 
 // add non-linear scaling to all mouse movements
 report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
+//    if (mouse_report.x != 0 || mouse_report.y != 0) {
+//        uprintf("Mouse report: x: %d, y: %d\n", mouse_report.x, mouse_report.y);
+//    }
     float x = mouse_report.x;
     float y = mouse_report.y;
 
-    float cos30 = 0.9659258;
-    float sin30 = -0.2588190;
+//    float cos30 = 0.9659258;
+//    float sin30 = -0.2588190;
 
-    mouse_report.x = (int8_t)(x * cos30 + y * sin30);
-    mouse_report.y = (int8_t)(-x * sin30 + y * cos30);
+//    mouse_report.x = (int8_t)(x * cos30 + y * sin30);
+//    mouse_report.y = (int8_t)(-x * sin30 + y * cos30);
+
+    mouse_report.x = y;
+    mouse_report.y = -x;
+
 
     // arrow key emulation
     if (layer_state_is(3)) {
